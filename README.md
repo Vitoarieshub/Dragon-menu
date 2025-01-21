@@ -13,8 +13,8 @@ local Tabs = {
     Settings = Window:AddTab({ Title = "Configuração", Icon = "settings" })
 }
 
--- parágrafos 
-Tabs.Main:AddParagraph({ Title = "Desenvolvido Vitor", Content = "Script atualizado aqui" })
+-- parágrafos
+Tabs.Main:AddParagraph({ Title = "Desenvolvedor Vitor", Content = "Script atualizado aqui" })
 
 -- Função de Notificação
 local function notify(title, text)
@@ -42,6 +42,34 @@ Tabs.Main:AddButton({
         notify("Fly Car", "Fly Car ativado!")
     end
 })
+
+-- Noclip
+local noclipConnection
+local function toggleNoclip(enable)
+    if enable then
+        if not noclipConnection then
+            noclipConnection = game:GetService("RunService").Stepped:Connect(function()
+                for _, part in pairs(game.Players.LocalPlayer.Character:GetDescendants()) do
+                    if part:IsA("BasePart") then
+                        part.CanCollide = false
+                    end
+                end
+            end)
+        end
+        notify("Travessa Paredes", "Você pode atravessar paredes agora!")
+    else
+        if noclipConnection then
+            noclipConnection:Disconnect()
+            noclipConnection = nil
+        end
+        for _, part in pairs(game.Players.LocalPlayer.Character:GetDescendants()) do
+            if part:IsA("BasePart") then
+                part.CanCollide = true
+            end
+        end
+        notify("Travessa Paredes", "Travessa Paredes desativado.")
+    end
+end
 
 Tabs.Main:AddToggle({
     Title = "Travessa Paredes",
@@ -76,34 +104,6 @@ Tabs.Main:AddToggle({
     Default = false,
     Callback = toggleInfiniteJump
 })
-
--- Função Noclip
-local noclipConnection
-local function toggleNoclip(enable)
-    if enable then
-        if not noclipConnection then
-            noclipConnection = game:GetService("RunService").Stepped:Connect(function()
-                for _, part in pairs(game.Players.LocalPlayer.Character:GetDescendants()) do
-                    if part:IsA("BasePart") then
-                        part.CanCollide = false
-                    end
-                end
-            end)
-        end
-        notify("Travessa Paredes", "Você pode atravessar paredes agora!")
-    else
-        if noclipConnection then
-            noclipConnection:Disconnect()
-            noclipConnection = nil
-        end
-        for _, part in pairs(game.Players.LocalPlayer.Character:GetDescendants()) do
-            if part:IsA("BasePart") then
-                part.CanCollide = true
-            end
-        end
-        notify("Travessa Paredes", "Travessa Paredes desativado.")
-    end
-end
 
 -- Função para definir a gravidade
 Tabs.Main:AddTextbox({
