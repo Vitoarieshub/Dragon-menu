@@ -1,7 +1,7 @@
 local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
 
 local Window = Fluent:CreateWindow({
-    Title = "Dragon menu " .. Fluent.Version,
+    Title = "Dragon Menu " .. Fluent.Version,
     TabWidth = 160,
     Size = UDim2.fromOffset(480, 440),
     Theme = "Dark"
@@ -40,6 +40,34 @@ Tabs.Geral:AddButton({
     end
 })
 
+-- Função Pulo Infinito
+local jumpConnection
+local function toggleInfiniteJump(enable)
+    if enable then
+        if not jumpConnection then
+            jumpConnection = game:GetService("UserInputService").JumpRequest:Connect(function()
+                local player = game.Players.LocalPlayer
+                local character = player.Character or player.CharacterAdded:Wait()
+                local humanoid = character:WaitForChild("Humanoid")
+                humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+            end)
+        end
+        notify("Pulo Infinito", "Pulo infinito ativado!")
+    else
+        if jumpConnection then
+            jumpConnection:Disconnect()
+            jumpConnection = nil
+        end
+        notify("Pulo Infinito", "Pulo infinito desativado.")
+    end
+end
+
+Tabs.Geral:AddToggle({
+    Title = "Pulo Infinito",
+    Default = false,
+    Callback = toggleInfiniteJump
+})
+
 -- Função Noclip
 local noclipConnection
 local function toggleNoclip(enable)
@@ -72,34 +100,6 @@ Tabs.Geral:AddToggle({
     Title = "Travessa Paredes",
     Default = false,
     Callback = toggleNoclip
-})
-
--- Função Pulo Infinito
-local jumpConnection
-local function toggleInfiniteJump(enable)
-    if enable then
-        if not jumpConnection then
-            jumpConnection = game:GetService("UserInputService").JumpRequest:Connect(function()
-                local player = game.Players.LocalPlayer
-                local character = player.Character or player.CharacterAdded:Wait()
-                local humanoid = character:WaitForChild("Humanoid")
-                humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
-            end)
-        end
-        notify("Pulo Infinito", "Pulo infinito ativado!")
-    else
-        if jumpConnection then
-            jumpConnection:Disconnect()
-            jumpConnection = nil
-        end
-        notify("Pulo Infinito", "Pulo infinito desativado.")
-    end
-end
-
-Tabs.Geral:AddToggle({
-    Title = "Pulo Infinito",
-    Default = false,
-    Callback = toggleInfiniteJump
 })
 
 -- Função para definir a gravidade
