@@ -1,17 +1,20 @@
 local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
 
 local Window = Fluent:CreateWindow({
-    Title = "Dragon Menu " .. Fluent.Version,
+    Title = "Dragon menu " .. Fluent.Version,
     TabWidth = 160,
     Size = UDim2.fromOffset(480, 440),
     Theme = "Dark"
 })
 
 local Tabs = {
-    Geral = Window:AddTab({ Title = "Geral" }),
+    Main = Window:AddTab({ Title = "Geral" }),
     Jogador = Window:AddTab({ Title = "Jogador" }),
     Settings = Window:AddTab({ Title = "Configuração", Icon = "settings" })
 }
+
+-- parágrafos 
+Tabs.Main:AddParagraph({ Title = "Desenvolvido Vitor", Content = "Script atualizado aqui" })
 
 -- Função de Notificação
 local function notify(title, text)
@@ -23,7 +26,7 @@ local function notify(title, text)
 end
 
 -- Botão Fly
-Tabs.Geral:AddButton({
+Tabs.Main:AddButton({
     Title = "Fly",
     Callback = function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/Vitoarieshub/Fly-universal-/refs/heads/main/README.md"))()
@@ -32,12 +35,18 @@ Tabs.Geral:AddButton({
 })
 
 -- Botão Fly Car
-Tabs.Geral:AddButton({
+Tabs.Main:AddButton({
     Title = "Fly Car",
     Callback = function()
         loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Fly-Car-Mobile-gui-11884"))()
         notify("Fly Car", "Fly Car ativado!")
     end
+})
+
+Tabs.Main:AddToggle({
+    Title = "Travessa Paredes",
+    Default = false,
+    Callback = toggleNoclip
 })
 
 -- Função Pulo Infinito
@@ -62,7 +71,7 @@ local function toggleInfiniteJump(enable)
     end
 end
 
-Tabs.Geral:AddToggle({
+Tabs.Main:AddToggle({
     Title = "Pulo Infinito",
     Default = false,
     Callback = toggleInfiniteJump
@@ -96,14 +105,8 @@ local function toggleNoclip(enable)
     end
 end
 
-Tabs.Geral:AddToggle({
-    Title = "Travessa Paredes",
-    Default = false,
-    Callback = toggleNoclip
-})
-
 -- Função para definir a gravidade
-Tabs.Geral:AddTextbox({
+Tabs.Main:AddTextbox({
     Title = "Gravidade",
     Default = "196.2",
     TextDisappear = true,
@@ -119,7 +122,7 @@ Tabs.Geral:AddTextbox({
 })
 
 -- Ajustar Altura do Pulo
-Tabs.Geral:AddTextbox({
+Tabs.Main:AddTextbox({
     Title = "Altura do Pulo",
     Default = "50",
     TextDisappear = true,
@@ -133,7 +136,7 @@ Tabs.Geral:AddTextbox({
 })
 
 -- Ajustar Velocidade
-Tabs.Geral:AddTextbox({
+Tabs.Main:AddTextbox({
     Title = "Velocidade",
     Default = "20",
     TextDisappear = true,
@@ -146,7 +149,7 @@ Tabs.Geral:AddTextbox({
     end
 })
 
-Tabs.Geral:AddButton({
+Tabs.Main:AddButton({
     Title = "Resetar Velocidade, Pulo e Gravidade",
     Callback = function()
         local player = game.Players.LocalPlayer
