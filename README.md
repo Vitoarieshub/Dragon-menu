@@ -2,13 +2,13 @@ local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/
 
 local Window = Fluent:CreateWindow({
     Title = "Dragon menu " .. Fluent.Version,
-    TabWidth = 160, 
+    TabWidth = 160,
     Size = UDim2.fromOffset(480, 440),
     Theme = "Dark"
 })
 
 local Tabs = {
-    Main = Window:AddTab({ Title = "Geral" }),
+    Geral = Window:AddTab({ Title = "Geral" }),
     Jogador = Window:AddTab({ Title = "Jogador" }),
     Settings = Window:AddTab({ Title = "Configuração", Icon = "settings" })
 }
@@ -23,7 +23,7 @@ local function notify(title, text)
 end
 
 -- Botão Fly
-Tabs.Main:AddButton({
+Tabs.Geral:AddButton({
     Title = "Fly",
     Callback = function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/Vitoarieshub/Fly-universal-/refs/heads/main/README.md"))()
@@ -32,7 +32,7 @@ Tabs.Main:AddButton({
 })
 
 -- Botão Fly Car
-Tabs.Main:AddButton({
+Tabs.Geral:AddButton({
     Title = "Fly Car",
     Callback = function()
         loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Fly-Car-Mobile-gui-11884"))()
@@ -68,7 +68,7 @@ local function toggleNoclip(enable)
     end
 end
 
-Tabs.Main:AddToggle({
+Tabs.Geral:AddToggle({
     Title = "Travessa Paredes",
     Default = false,
     Callback = toggleNoclip
@@ -96,14 +96,14 @@ local function toggleInfiniteJump(enable)
     end
 end
 
-Tabs.Main:AddToggle({
+Tabs.Geral:AddToggle({
     Title = "Pulo Infinito",
     Default = false,
     Callback = toggleInfiniteJump
 })
 
 -- Função para definir a gravidade
-Tabs.Main:AddTextbox({
+Tabs.Geral:AddTextbox({
     Title = "Gravidade",
     Default = "196.2",
     TextDisappear = true,
@@ -119,7 +119,7 @@ Tabs.Main:AddTextbox({
 })
 
 -- Ajustar Altura do Pulo
-Tabs.Main:AddTextbox({
+Tabs.Geral:AddTextbox({
     Title = "Altura do Pulo",
     Default = "50",
     TextDisappear = true,
@@ -133,7 +133,7 @@ Tabs.Main:AddTextbox({
 })
 
 -- Ajustar Velocidade
-Tabs.Main:AddTextbox({
+Tabs.Geral:AddTextbox({
     Title = "Velocidade",
     Default = "20",
     TextDisappear = true,
@@ -146,7 +146,7 @@ Tabs.Main:AddTextbox({
     end
 })
 
-Tabs.Main:AddButton({
+Tabs.Geral:AddButton({
     Title = "Resetar Velocidade, Pulo e Gravidade",
     Callback = function()
         local player = game.Players.LocalPlayer
@@ -157,7 +157,7 @@ Tabs.Main:AddButton({
             humanoid.WalkSpeed = 20
             humanoid.JumpPower = 50
             game.Workspace.Gravity = 196.2
-            
+
             notify("Resetado", "Velocidade, Altura do Pulo e Gravidade foram resetadas!")
         else
             notify("Erro", "Humanoide não encontrado!")
@@ -165,19 +165,7 @@ Tabs.Main:AddButton({
     end
 })
 
-local playerDropdown
-local EspectarConnection
-
--- Função para atualizar a lista de jogadores no dropdown
-local function updatePlayerList(dropdown)
-    local playerNames = {}
-    for _, player in ipairs(game.Players:GetPlayers()) do
-        table.insert(playerNames, player.Name)
-    end
-    dropdown:Refresh(playerNames, true)
-end
-
--- Função para começar a espectar o jogador
+-- Função para espectar jogador
 local function spectatePlayer(playerName)
     local localPlayer = game.Players.LocalPlayer
     local player = game.Players:FindFirstChild(playerName)
@@ -196,40 +184,50 @@ local function stopSpectating()
     notify("Espectador", "Você parou de espectar o jogador.")
 end
 
+-- Seção de Espectar
 local Section = Tabs.Jogador:AddSection({
-    Name = "Espectar"
+    Title = "Espectar"
 })
 
--- Criação do Dropdown para escolher o jogador para espectar
-playerDropdown = Tabs.Jogador:AddDropdown({
-    Name = "Espectar Jogador",
+-- Dropdown de seleção de jogador para espectar
+local playerDropdown = Tabs.Jogador:AddDropdown({
+    Title = "Espectar Jogador",
     Options = {},
     Callback = function(selectedPlayer)
         spectatePlayer(selectedPlayer)
     end
 })
 
--- Botão para Atualizar a Lista de Jogadores
+-- Função para atualizar a lista de jogadores no dropdown
+local function updatePlayerList(dropdown)
+    local playerNames = {}
+    for _, player in ipairs(game.Players:GetPlayers()) do
+        table.insert(playerNames, player.Name)
+    end
+    dropdown:Refresh(playerNames, true)
+end
+
+-- Botão para atualizar a lista de jogadores
 Tabs.Jogador:AddButton({
-    Name = "Atualizar Lista de Jogadores",
+    Title = "Atualizar Lista de Jogadores",
     Callback = function()
         updatePlayerList(playerDropdown)
         notify("Atualizar Lista", "Lista de jogadores atualizada!")
     end
 })
 
--- Botão para Parar de Espectar
+-- Botão para parar de espectar
 Tabs.Jogador:AddButton({
-    Name = "Parar de Espectar",
+    Title = "Parar de Espectar",
     Callback = function()
         stopSpectating()
     end
 })
 
--- Inicializar a Lista de Jogadores ao Carregar o Script
+-- Inicializar a lista de jogadores ao carregar o script
 updatePlayerList(playerDropdown)
 
--- Eventos para Atualizar a Lista quando um Jogador Entra ou Sai
+-- Eventos para atualizar a lista quando um jogador entra ou sai
 game.Players.PlayerAdded:Connect(function()
     updatePlayerList(playerDropdown)
 end)
@@ -237,8 +235,6 @@ end)
 game.Players.PlayerRemoving:Connect(function()
     updatePlayerList(playerDropdown)
 end)
-
-local teleportDropdown
 
 -- Função para teleportar para outro jogador
 local function teleportToPlayer(playerName)
@@ -254,33 +250,33 @@ local function teleportToPlayer(playerName)
     end
 end
 
+-- Seção de Teleporta
 local Section = Tabs.Jogador:AddSection({
-    Name = "Teleporta"
+    Title = "Teleporta"
 })
 
--- Dropdown de Seleção de Jogador para teleportar
-teleportDropdown = Tabs.Jogador:AddDropdown({
-    Name = "Teleportar para Jogador",
+-- Dropdown de seleção de jogador para teleportar
+local teleportDropdown = Tabs.Jogador:AddDropdown({
+    Title = "Teleportar para Jogador",
     Options = {},
-    Default = nil,
     Callback = function(selectedPlayer)
         teleportToPlayer(selectedPlayer)
     end
 })
 
--- Botão para Atualizar Lista de Jogadores
+-- Botão para atualizar lista de jogadores
 Tabs.Jogador:AddButton({
-    Name = "Atualizar Lista de Jogadores",
+    Title = "Atualizar Lista de Jogadores",
     Callback = function()
         updatePlayerList(teleportDropdown)
         notify("Atualizar Lista", "Lista de jogadores atualizada!")
     end
 })
 
--- Inicializar a Lista de Jogadores ao Carregar o Script
+-- Inicializar a lista de jogadores ao carregar o script
 updatePlayerList(teleportDropdown)
 
--- Eventos para Atualizar a Lista quando um Jogador Entra ou Sai
+-- Eventos para atualizar a lista quando um jogador entra ou sai
 game.Players.PlayerAdded:Connect(function()
     updatePlayerList(teleportDropdown)
 end)
@@ -288,3 +284,12 @@ end)
 game.Players.PlayerRemoving:Connect(function()
     updatePlayerList(teleportDropdown)
 end)
+
+-- Botão Anti Kick
+Tabs.Settings:AddButton({
+    Title = "Anti Kick",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/Exunys/Anti-Kick/main/Anti-Kick.lua"))()
+        notify("Anti Kick", "Anti Kick ativado!")
+    end
+})
