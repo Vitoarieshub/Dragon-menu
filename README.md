@@ -3,18 +3,9 @@ local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/
 local Window = Fluent:CreateWindow({
     Title = "Dragon menu " .. Fluent.Version,
     TabWidth = 160,
-    Size = UDim2.fromOffset(480, 440),
+    Size = UDim2.fromOffset(460, 440),
     Theme = "Dark"
 })
-
-local Tabs = {
-    Main = Window:AddTab({ Title = "Geral" }),
-    Jogador = Window:AddTab({ Title = "Jogador" }),
-    Settings = Window:AddTab({ Title = "Configuração", Icon = "settings" })
-}
-
--- parágrafos
-Tabs.Main:AddParagraph({ Title = "Desenvolvedor Vitor", Content = "Script atualizado aqui" })
 
 -- Função de Notificação
 local function notify(title, text)
@@ -24,6 +15,14 @@ local function notify(title, text)
         Duration = 5
     })
 end
+
+local Tabs = {
+     Main = Window:AddTab({ Title = "scripts" })
+    Settings = Window:AddTab({ Title = "Configuração", Icon = "settings" })
+}
+
+-- Parágrafo
+Tabs.Main:AddParagraph({ Title = "Desenvolvedor Vitor", Content = "Script atualizado aqui" })
 
 -- Botão Fly
 Tabs.Main:AddButton({
@@ -44,6 +43,13 @@ Tabs.Main:AddButton({
 })
 
 -- Noclip
+Tabs.Main:AddToggle({
+    Title = "Travessa Paredes",
+    Default = false,
+    Callback = toggleNoclip
+})
+
+-- Função Noclip
 local noclipConnection
 local function toggleNoclip(enable)
     if enable then
@@ -71,13 +77,7 @@ local function toggleNoclip(enable)
     end
 end
 
-Tabs.Main:AddToggle({
-    Title = "Travessa Paredes",
-    Default = false,
-    Callback = toggleNoclip
-})
-
--- Função Pulo Infinito
+-- Pulo Infinito
 local jumpConnection
 local function toggleInfiniteJump(enable)
     if enable then
@@ -105,7 +105,7 @@ Tabs.Main:AddToggle({
     Callback = toggleInfiniteJump
 })
 
--- Função para definir a gravidade
+-- Definir Gravidade
 Tabs.Main:AddTextbox({
     Title = "Gravidade",
     Default = "196.2",
@@ -149,6 +149,7 @@ Tabs.Main:AddTextbox({
     end
 })
 
+-- Resetar Velocidade, Pulo e Gravidade
 Tabs.Main:AddButton({
     Title = "Resetar Velocidade, Pulo e Gravidade",
     Callback = function()
@@ -165,134 +166,5 @@ Tabs.Main:AddButton({
         else
             notify("Erro", "Humanoide não encontrado!")
         end
-    end
-})
-
--- Função para espectar jogador
-local function spectatePlayer(playerName)
-    local localPlayer = game.Players.LocalPlayer
-    local player = game.Players:FindFirstChild(playerName)
-
-    if player and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-        workspace.CurrentCamera.CameraSubject = player.Character.HumanoidRootPart
-        notify("Espectador", "Você está agora espectando: " .. playerName)
-    else
-        notify("Erro", "Jogador não encontrado.")
-    end
-end
-
--- Função para parar de espectar e voltar para o personagem local
-local function stopSpectating()
-    workspace.CurrentCamera.CameraSubject = game.Players.LocalPlayer.Character:WaitForChild("Humanoid")
-    notify("Espectador", "Você parou de espectar o jogador.")
-end
-
--- Seção de Espectar
-local Section = Tabs.Jogador:AddSection({
-    Title = "Espectar"
-})
-
--- Dropdown de seleção de jogador para espectar
-local playerDropdown = Tabs.Jogador:AddDropdown({
-    Title = "Espectar Jogador",
-    Options = {},
-    Callback = function(selectedPlayer)
-        spectatePlayer(selectedPlayer)
-    end
-})
-
--- Função para atualizar a lista de jogadores no dropdown
-local function updatePlayerList(dropdown)
-    local playerNames = {}
-    for _, player in ipairs(game.Players:GetPlayers()) do
-        table.insert(playerNames, player.Name)
-    end
-    dropdown:Refresh(playerNames, true)
-end
-
--- Botão para atualizar a lista de jogadores
-Tabs.Jogador:AddButton({
-    Title = "Atualizar Lista de Jogadores",
-    Callback = function()
-        updatePlayerList(playerDropdown)
-        notify("Atualizar Lista", "Lista de jogadores atualizada!")
-    end
-})
-
--- Botão para parar de espectar
-Tabs.Jogador:AddButton({
-    Title = "Parar de Espectar",
-    Callback = function()
-        stopSpectating()
-    end
-})
-
--- Inicializar a lista de jogadores ao carregar o script
-updatePlayerList(playerDropdown)
-
--- Eventos para atualizar a lista quando um jogador entra ou sai
-game.Players.PlayerAdded:Connect(function()
-    updatePlayerList(playerDropdown)
-end)
-
-game.Players.PlayerRemoving:Connect(function()
-    updatePlayerList(playerDropdown)
-end)
-
--- Função para teleportar para outro jogador
-local function teleportToPlayer(playerName)
-    local player = game.Players:FindFirstChild(playerName)
-    if player and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-        local character = game.Players.LocalPlayer.Character
-        if character then
-            character:MoveTo(player.Character.HumanoidRootPart.Position)
-            notify("Teleporte", "Teleportado para " .. playerName)
-        end
-    else
-        notify("Erro", "Jogador não encontrado.")
-    end
-end
-
--- Seção de Teleporta
-local Section = Tabs.Jogador:AddSection({
-    Title = "Teleporta"
-})
-
--- Dropdown de seleção de jogador para teleportar
-local teleportDropdown = Tabs.Jogador:AddDropdown({
-    Title = "Teleportar para Jogador",
-    Options = {},
-    Callback = function(selectedPlayer)
-        teleportToPlayer(selectedPlayer)
-    end
-})
-
--- Botão para atualizar lista de jogadores
-Tabs.Jogador:AddButton({
-    Title = "Atualizar Lista de Jogadores",
-    Callback = function()
-        updatePlayerList(teleportDropdown)
-        notify("Atualizar Lista", "Lista de jogadores atualizada!")
-    end
-})
-
--- Inicializar a lista de jogadores ao carregar o script
-updatePlayerList(teleportDropdown)
-
--- Eventos para atualizar a lista quando um jogador entra ou sai
-game.Players.PlayerAdded:Connect(function()
-    updatePlayerList(teleportDropdown)
-end)
-
-game.Players.PlayerRemoving:Connect(function()
-    updatePlayerList(teleportDropdown)
-end)
-
--- Botão Anti Kick
-Tabs.Settings:AddButton({
-    Title = "Anti Kick",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/Exunys/Anti-Kick/main/Anti-Kick.lua"))()
-        notify("Anti Kick", "Anti Kick ativado!")
     end
 })
