@@ -17,7 +17,7 @@ local function notify(title, text)
 end
 
 local Tabs = {
-     Main = Window:AddTab({ Title = "scripts" })
+    Main = Window:AddTab({ Title = "Scripts" }),
     Settings = Window:AddTab({ Title = "Configuração", Icon = "settings" })
 }
 
@@ -40,13 +40,6 @@ Tabs.Main:AddButton({
         loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Fly-Car-Mobile-gui-11884"))()
         notify("Fly Car", "Fly Car ativado!")
     end
-})
-
--- Noclip
-Tabs.Main:AddToggle({
-    Title = "Travessa Paredes",
-    Default = false,
-    Callback = toggleNoclip
 })
 
 -- Função Noclip
@@ -77,7 +70,14 @@ local function toggleNoclip(enable)
     end
 end
 
--- Pulo Infinito
+-- Toggle Noclip
+Tabs.Main:AddToggle({
+    Title = "Travessa Paredes",
+    Default = false,
+    Callback = toggleNoclip
+})
+
+-- Função Pulo Infinito
 local jumpConnection
 local function toggleInfiniteJump(enable)
     if enable then
@@ -99,6 +99,7 @@ local function toggleInfiniteJump(enable)
     end
 end
 
+-- Toggle Pulo Infinito
 Tabs.Main:AddToggle({
     Title = "Pulo Infinito",
     Default = false,
