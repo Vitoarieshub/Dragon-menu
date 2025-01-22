@@ -1,48 +1,61 @@
+-- Dragon menu (Beta)
+-- Desenvolvido por Vitor
+-- Script otimizado e organizado
+
+-- Carregar Fluent
 local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
 
+-- Função para enviar notificações
+local function notify(title, content)
+    Fluent:Notify({ Title = title, Content = content })
+end
+
+-- Aviso ao executar
+notify("Executado!", "🐉 O melhor script universal executado com sucesso 🐉.")
+
+-- Criar a janela principal
 local Window = Fluent:CreateWindow({
-    Title = "Dragon menu " .. Fluent.Version,
-    TabWidth = 160,
-    Size = UDim2.fromOffset(460, 440),
+    Title = "Dragon menu (Beta) " .. Fluent.Version,
+    TabWidth = 90,
+    Size = UDim2.fromOffset(420, 310),
     Theme = "Dark"
 })
 
--- Função de Notificação
-local function notify(title, text)
-    game.StarterGui:SetCore("SendNotification", {
-        Title = title,
-        Text = text,
-        Duration = 5
-    })
-end
-
+-- Tabela de abas
 local Tabs = {
-    Main = Window:AddTab({ Title = "Scripts" }),
-    Settings = Window:AddTab({ Title = "Configuração", Icon = "settings" })
+    Main = Window:AddTab({ Title = "Main" }),
+    Players = Window:AddTab({ Title = "Players" }),
+    Settings = Window:AddTab({ Title = "Config", Icon = "settings" })
 }
 
--- Parágrafo
-Tabs.Main:AddParagraph({ Title = "Desenvolvedor Vitor", Content = "Script atualizado aqui" })
+-- Funções utilitárias
+local function setHumanoidProperty(property, value)
+    local player = game.Players.LocalPlayer
+    local character = player.Character or player.CharacterAdded:Wait()
+    local humanoid = character:WaitForChild("Humanoid")
+    humanoid[property] = value
+    print(property .. " ajustado para:", value)
+end
 
--- Botão Fly
-Tabs.Main:AddButton({
-    Title = "Fly",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/Vitoarieshub/Fly-universal-/refs/heads/main/README.md"))()
-        notify("Fly", "Fly ativado!")
+-- Função para Infinite Jump
+local jumpConnection
+local function toggleInfiniteJump(enable)
+    if enable then
+        if not jumpConnection then
+            jumpConnection = game:GetService("UserInputService").JumpRequest:Connect(function()
+                local player = game.Players.LocalPlayer
+                local character = player.Character or player.CharacterAdded:Wait()
+                local humanoid = character:WaitForChild("Humanoid")
+                humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+            end)
+        end
+    elseif jumpConnection then
+        jumpConnection:Disconnect()
+        jumpConnection = nil
     end
-})
+end
 
--- Botão Fly Car
-Tabs.Main:AddButton({
-    Title = "Fly Car",
-    Callback = function()
-        loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Fly-Car-Mobile-gui-11884"))()
-        notify("Fly Car", "Fly Car ativado!")
-    end
-})
-
--- Função Noclip
+-- Função para Noclip
 local noclipConnection
 local function toggleNoclip(enable)
     if enable then
@@ -55,7 +68,7 @@ local function toggleNoclip(enable)
                 end
             end)
         end
-        notify("Travessa Paredes", "Você pode atravessar paredes agora!")
+        notify("Noclip Ativado", "Você pode atravessar paredes agora!")
     else
         if noclipConnection then
             noclipConnection:Disconnect()
@@ -66,106 +79,114 @@ local function toggleNoclip(enable)
                 part.CanCollide = true
             end
         end
-        notify("Travessa Paredes", "Travessa Paredes desativado.")
+        notify("Noclip Desativado", "Noclip foi desligado.")
     end
 end
 
--- Toggle Noclip
-Tabs.Main:AddToggle({
+-- Funções de atualização de lista de jogadores e teleporte
+local function updatePlayerList(dropdown)
+    local players = game.Players:GetPlayers()
+    local playerNames = {}
+    for _, player in ipairs(players) do
+        table.insert(playerNames, player.Name)
+    end
+    dropdown:Refresh(playerNames)
+end
+
+local function teleportToPlayer(playerName)
+    local player = game.Players:FindFirstChild(playerName)
+    if player and player.Character then
+        local character = game.Players.LocalPlayer.Character
+        if character then
+            character:SetPrimaryPartCFrame(player.Character.PrimaryPart.CFrame)
+        end
+    end
+end
+
+-- Aba: Início (Main)
+Tabs.Main:AddParagraph({ Title = "Programador Vitor", Content = "Scripts personalizados" })
+
+Tabs.Main:AddButton({
+    Name = "Fly",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/Vitoarieshub/Fly-universal-/refs/heads/main/README.md"))()
+        notify("Fly", "Fly ativado!")
+    end
+})
+
+Tabs.Main:AddToggle("Travessa Paredes", {
     Title = "Travessa Paredes",
+    Description = "Ativa/desativa a travessia de paredes",
     Default = false,
     Callback = toggleNoclip
 })
 
--- Função Pulo Infinito
-local jumpConnection
-local function toggleInfiniteJump(enable)
-    if enable then
-        if not jumpConnection then
-            jumpConnection = game:GetService("UserInputService").JumpRequest:Connect(function()
-                local player = game.Players.LocalPlayer
-                local character = player.Character or player.CharacterAdded:Wait()
-                local humanoid = character:WaitForChild("Humanoid")
-                humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
-            end)
-        end
-        notify("Pulo Infinito", "Pulo infinito ativado!")
-    else
-        if jumpConnection then
-            jumpConnection:Disconnect()
-            jumpConnection = nil
-        end
-        notify("Pulo Infinito", "Pulo infinito desativado.")
-    end
-end
-
--- Toggle Pulo Infinito
-Tabs.Main:AddToggle({
-    Title = "Pulo Infinito",
+Tabs.Main:AddToggle("Pulo infinito", {
+    Title = "Pulo infinito",
+    Description = "Ativa/desativa o pulo infinito",
     Default = false,
-    Callback = toggleInfiniteJump
-})
-
--- Definir Gravidade
-Tabs.Main:AddTextbox({
-    Title = "Gravidade",
-    Default = "196.2",
-    TextDisappear = true,
-    Callback = function(value)
-        local gravityValue = tonumber(value)
-        if gravityValue then
-            game.Workspace.Gravity = gravityValue
-            notify("Gravidade Alterada", "A gravidade foi ajustada para " .. value .. ".")
-        else
-            notify("Erro", "Por favor, digite um valor numérico válido para a gravidade.")
-        end
+    Callback = function(state)
+        notify(state and "Infinite Jump Ativado" or "Infinite Jump Desativado", 
+               state and "Pulo infinito ativado com sucesso!" or "Pulo infinito desativado.")
+        toggleInfiniteJump(state)
     end
 })
 
--- Ajustar Altura do Pulo
-Tabs.Main:AddTextbox({
-    Title = "Altura do Pulo",
-    Default = "50",
-    TextDisappear = true,
+Tabs.Main:AddSlider("JumpPower", {
+    Title = "Ajustar pulo",
+    Description = "Define a altura do pulo",
+    Default = 50,
+    Min = 0,
+    Max = 200,
+    Rounding = 1,
     Callback = function(value)
-        local humanoid = game.Players.LocalPlayer.Character:FindFirstChild("Humanoid")
-        if humanoid then
-            humanoid.JumpPower = tonumber(value)
-            notify("Altura do Pulo", "Altura do Pulo ajustada para " .. value)
-        end
+        setHumanoidProperty("JumpPower", value)
     end
 })
 
--- Ajustar Velocidade
-Tabs.Main:AddTextbox({
+Tabs.Main:AddSlider("WalkSpeed", {
     Title = "Velocidade",
-    Default = "20",
-    TextDisappear = true,
+    Description = "Define a velocidade do jogador",
+    Default = 20,
+    Min = 0,
+    Max = 100,
+    Rounding = 1,
     Callback = function(value)
-        local humanoid = game.Players.LocalPlayer.Character:FindFirstChild("Humanoid")
-        if humanoid then
-            humanoid.WalkSpeed = tonumber(value)
-            notify("Velocidade", "Velocidade ajustada para " .. value)
-        end
+        setHumanoidProperty("WalkSpeed", value)
     end
 })
 
--- Resetar Velocidade, Pulo e Gravidade
-Tabs.Main:AddButton({
-    Title = "Resetar Velocidade, Pulo e Gravidade",
+-- Aba: Jogadores (Players)
+Tabs.Players:AddButton({
+    Title = "ESP Universal",
     Callback = function()
-        local player = game.Players.LocalPlayer
-        local character = player.Character or player.CharacterAdded:Wait()
-        local humanoid = character:FindFirstChildOfClass("Humanoid")
-
-        if humanoid then
-            humanoid.WalkSpeed = 20
-            humanoid.JumpPower = 50
-            game.Workspace.Gravity = 196.2
-
-            notify("Resetado", "Velocidade, Altura do Pulo e Gravidade foram resetadas!")
-        else
-            notify("Erro", "Humanoide não encontrado!")
-        end
+        loadstring(game:HttpGet("https://pastebin.com/raw/rSUGN1fK"))()
     end
 })
+
+local teleportDropdown = Tabs.Players:AddDropdown({
+    Name = "Teleportar no Player",
+    Options = {},
+    Default = nil,
+    Callback = teleportToPlayer
+})
+
+Tabs.Players:AddButton({
+    Name = "Atualizar Lista de Players",
+    Callback = function()
+        updatePlayerList(teleportDropdown)
+        notify("Atualizar Lista", "Lista de jogadores atualizada!")
+    end
+})
+
+-- Inicializar a Lista de Jogadores ao Carregar o Script
+updatePlayerList(teleportDropdown)
+
+-- Eventos para Atualizar a Lista quando um Jogador Entra ou Sai
+game.Players.PlayerAdded:Connect(function()
+    updatePlayerList(teleportDropdown)
+end)
+
+game.Players.PlayerRemoving:Connect(function()
+    updatePlayerList(teleportDropdown)
+end)
