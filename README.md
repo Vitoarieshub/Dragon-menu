@@ -1,8 +1,8 @@
--- Dragon menu (Beta)
+-- Áries Hub - Versão Universal
 -- Desenvolvido por Vitor
 -- Script otimizado e organizado
 
--- Carregar Fluent
+-- Carregar Script Fluent
 local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
 
 -- Função para enviar notificações
@@ -10,22 +10,22 @@ local function notify(title, content)
     Fluent:Notify({ Title = title, Content = content })
 end
 
--- Aviso ao executar
-notify("Executado!", "🐉 O melhor script universal executado com sucesso 🐉.")
+-- Aviso de execução
+notify("Executado!", "Script executado com sucesso.")
 
 -- Criar a janela principal
 local Window = Fluent:CreateWindow({
-    Title = "Dragon menu (Beta) " .. Fluent.Version,
-    TabWidth = 90,
+    Title = "Áries Hub | Versão: Universal " .. Fluent.Version,
+    TabWidth = 40,
     Size = UDim2.fromOffset(420, 310),
     Theme = "Dark"
 })
 
 -- Tabela de abas
 local Tabs = {
-    Main = Window:AddTab({ Title = "Main" }),
-    Players = Window:AddTab({ Title = "Players" }),
-    Settings = Window:AddTab({ Title = "Config", Icon = "settings" })
+    Main = Window:AddTab({ Title = "Início" }),
+    Players = Window:AddTab({ Title = "Jogadores" }),
+    Vehicle = Window:AddTab({ Title = "Veículos" }),
 }
 
 -- Funções utilitárias
@@ -37,7 +37,7 @@ local function setHumanoidProperty(property, value)
     print(property .. " ajustado para:", value)
 end
 
--- Função para Infinite Jump
+-- Pulo infinito
 local jumpConnection
 local function toggleInfiniteJump(enable)
     if enable then
@@ -55,7 +55,7 @@ local function toggleInfiniteJump(enable)
     end
 end
 
--- Função para Noclip
+-- Noclip
 local noclipConnection
 local function toggleNoclip(enable)
     if enable then
@@ -83,58 +83,37 @@ local function toggleNoclip(enable)
     end
 end
 
--- Funções de atualização de lista de jogadores e teleporte
-local function updatePlayerList(dropdown)
-    local players = game.Players:GetPlayers()
-    local playerNames = {}
-    for _, player in ipairs(players) do
-        table.insert(playerNames, player.Name)
-    end
-    dropdown:Refresh(playerNames)
-end
-
-local function teleportToPlayer(playerName)
-    local player = game.Players:FindFirstChild(playerName)
-    if player and player.Character then
-        local character = game.Players.LocalPlayer.Character
-        if character then
-            character:SetPrimaryPartCFrame(player.Character.PrimaryPart.CFrame)
-        end
-    end
-end
-
--- Aba: Início (Main)
-Tabs.Main:AddParagraph({ Title = "Programador Vitor", Content = "Scripts personalizados" })
+-- Aba: Início
+Tabs.Main:AddParagraph({ Title = "Desenvolvedor: Vitor", Content = "Scripts personalizados e otimizados." })
 
 Tabs.Main:AddButton({
-    Name = "Fly",
+    Title = "Fly",
     Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/Vitoarieshub/Fly-universal-/refs/heads/main/README.md"))()
-        notify("Fly", "Fly ativado!")
+        loadstring(game:HttpGet("https://pastebin.com/raw/YSL3xKYU"))()
     end
 })
 
-Tabs.Main:AddToggle("Travessa Paredes", {
-    Title = "Travessa Paredes",
+Tabs.Main:AddToggle("noclip", {
+    Title = "Noclip",
     Description = "Ativa/desativa a travessia de paredes",
     Default = false,
     Callback = toggleNoclip
 })
 
-Tabs.Main:AddToggle("Pulo infinito", {
-    Title = "Pulo infinito",
+Tabs.Main:AddToggle("infjump", {
+    Title = "Pulo Infinito",
     Description = "Ativa/desativa o pulo infinito",
     Default = false,
     Callback = function(state)
-        notify(state and "Infinite Jump Ativado" or "Infinite Jump Desativado", 
-               state and "Pulo infinito ativado com sucesso!" or "Pulo infinito desativado.")
+        notify(state and "Pulo Infinito Ativado" or "Pulo Infinito Desativado", 
+               state and "Agora você pode pular infinitamente!" or "Pulo infinito foi desativado.")
         toggleInfiniteJump(state)
     end
 })
 
 Tabs.Main:AddSlider("JumpPower", {
-    Title = "Ajustar pulo",
-    Description = "Define a altura do pulo",
+    Title = "Altura do Pulo",
+    Description = "Ajusta a altura do pulo",
     Default = 50,
     Min = 0,
     Max = 200,
@@ -146,8 +125,8 @@ Tabs.Main:AddSlider("JumpPower", {
 
 Tabs.Main:AddSlider("WalkSpeed", {
     Title = "Velocidade",
-    Description = "Define a velocidade do jogador",
-    Default = 20,
+    Description = "Ajusta a velocidade do jogador",
+    Default = 16,
     Min = 0,
     Max = 100,
     Rounding = 1,
@@ -156,7 +135,7 @@ Tabs.Main:AddSlider("WalkSpeed", {
     end
 })
 
--- Aba: Jogadores (Players)
+-- Aba: Jogadores
 Tabs.Players:AddButton({
     Title = "ESP Universal",
     Callback = function()
@@ -164,29 +143,24 @@ Tabs.Players:AddButton({
     end
 })
 
-local teleportDropdown = Tabs.Players:AddDropdown({
-    Name = "Teleportar no Player",
-    Options = {},
-    Default = nil,
-    Callback = teleportToPlayer
-})
-
 Tabs.Players:AddButton({
-    Name = "Atualizar Lista de Players",
+    Title = "Teleporte Universal",
     Callback = function()
-        updatePlayerList(teleportDropdown)
-        notify("Atualizar Lista", "Lista de jogadores atualizada!")
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/Infinity2346/Tect-Menu/main/Teleport%20Gui.lua"))()
     end
 })
 
--- Inicializar a Lista de Jogadores ao Carregar o Script
-updatePlayerList(teleportDropdown)
+Tabs.Players:AddButton({
+    Title = "BringParts",
+    Callback = function()
+        loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Better-Bring-Parts-Ui-SOLARA-and-Fixed-Lags-21780"))()
+    end
+})
 
--- Eventos para Atualizar a Lista quando um Jogador Entra ou Sai
-game.Players.PlayerAdded:Connect(function()
-    updatePlayerList(teleportDropdown)
-end)
-
-game.Players.PlayerRemoving:Connect(function()
-    updatePlayerList(teleportDropdown)
-end)
+-- Aba: Veículos
+Tabs.Vehicle:AddButton({
+    Title = "Fly Car",
+    Callback = function()
+        loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Fly-Car-Mobile-gui-11884"))()
+    end
+})
