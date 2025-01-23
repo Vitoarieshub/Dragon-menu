@@ -1,191 +1,214 @@
--- Dragão menu [Beta]
--- Desenvolvido por Victor 
--- Script otimizado 
+-- Carregar biblioteca Orion
+local OrionLib = loadstring(jogo:HttpGet(('https://raw.githubusercontent.com/shlexware/Orion/main/source')))()
 
--- Carregar Fluent
-local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
-
--- Função para enviar notificações
-local function notify(title, content)
-    Fluent:Notify({ Title = title, Content = content })
-end
-
--- Aviso ao executar
-notify("Executado!", "Script executado com sucesso.")
-
--- Criar a janela principal
-local Window = Fluent:CreateWindow({
-    Title = "Dragão menu [Beta] " .. Fluent.Version,
-    TabWidth = 90,
-    Size = UDim2.fromOffset(420, 310),
-    Theme = "Dark"
+-- Criar uma janela
+Janela local = OrionLib:MakeWindow({
+    Nome = "Hub de Fraise",
+    HidePremium = falso,
+    IntroText = "Feito por Fraise LE BG e Neyrozz",
+    SaveConfig = verdadeiro,
+    ConfigFolder = "FraiseHubConfig"
 })
 
--- Tabela de abas
-local Tabs = {
-    Main = Window:AddTab({ Title = "Início" }),
-    Players = Window:AddTab({ Title = "Jogadores" }),
-}
+-- Variáveis para controlar hitboxes
+_G.Tamanho da cabeça = 30
+_G.Transparência = 0,7
+_G.ShowHitboxes = falso
+_G.Desabilitado = verdadeiro
 
--- Funções utilitárias
-local function setHumanoidProperty(property, value)
-    local player = game.Players.LocalPlayer
-    local character = player.Character or player.CharacterAdded:Wait()
-    local humanoid = character:WaitForChild("Humanoid")
-    humanoid[property] = value
-    print(property .. " ajustado para:", value)
-end
+-- Função para aplicar alterações no hitbox
+função local applyHitboxChanges()
+    jogo:GetService('RunService').RenderStepped:Connect(função()
+        se não _G.Disabled então
+            para i,v no próximo, jogo:GetService('Players'):GetPlayers() faça
+                se v.Name ~= game:GetService('Players').LocalPlayer.Name e v.Character e v.Character:FindFirstChild("HumanoidRootPart") então
+                    pcall(função()
+                        v.Character.HumanoidRootPart.Size = Vetor3.new(_G.TamanhoCabeça, _G.TamanhoCabeça, _G.TamanhoCabeça)
+                        v.Character.HumanoidRootPart.Transparência = _G.Transparência
+                        v.Character.HumanoidRootPart.BrickColor = BrickColor.new("Muito azul")
+                        v.Character.HumanoidRootPart.Material = "Neon"
+                        v.Character.HumanoidRootPart.CanCollide = falso
+                    fim)
+                fim
+            fim
+        fim
+    fim)
+fim
 
--- Infinite Jump
-local jumpConnection
-local function toggleInfiniteJump(enable)
-    if enable then
-        if not jumpConnection then
-            jumpConnection = game:GetService("UserInputService").JumpRequest:Connect(function()
-                local player = game.Players.LocalPlayer
-                local character = player.Character or player.CharacterAdded:Wait()
-                local humanoid = character:WaitForChild("Humanoid")
-                humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
-            end)
-        end
-    elseif jumpConnection then
-        jumpConnection:Disconnect()
-        jumpConnection = nil
-    end
-end
-
--- Noclip
-local noclipConnection
-local function toggleNoclip(enable)
-    if enable then
-        if not noclipConnection then
-            noclipConnection = game:GetService("RunService").Stepped:Connect(function()
-                for _, part in pairs(game.Players.LocalPlayer.Character:GetDescendants()) do
-                    if part:IsA("BasePart") then
-                        part.CanCollide = false
-                    end
-                end
-            end)
-        end
-        notify("Noclip Ativado", "Você pode atravessar paredes agora!")
-    else
-        if noclipConnection then
-            noclipConnection:Disconnect()
-            noclipConnection = nil
-        end
-        for _, part in pairs(game.Players.LocalPlayer.Character:GetDescendants()) do
-            if part:IsA("BasePart") then
-                part.CanCollide = true
-            end
-        end
-        notify("Noclip Desativado", "Noclip foi desligado.")
-    end
-end
-
--- Aba: Início
-Tabs.Main:AddParagraph({ Title = "Programador Victor", Content = "Scripts personalizados" })
-
-Tabs.Main:AddButton({
-    Title = "Fly",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/Vitoarieshub/Fly-universal-/refs/heads/main/README.md"))()
-    end
+-- Autoguia para controles Hitbox
+HitboxTab local = Janela:CriarTab({
+    Nome = "Controles do Hitbox",
+    Ícone = "rbxassetid://4483345998",
+    PremiumOnly = falso
 })
 
-Tabs.Main:AddToggle("noclip", {
-    Title = "Noclip",
-    Description = "Ativa/desativa a travessia de paredes",
-    Default = false,
-    Callback = toggleNoclip
+-- Alternar para habilitar/desabilitar hitboxes
+HitboxTab:AdicionarAlternar({
+    Nome = "Habilitar Hitboxes",
+    Padrão = falso,
+    Retorno de chamada = função(Valor)
+        _G.Disabled = não Valor
+        se não for valor então
+            para _,v em seguida, jogo:GetService('Players'):GetPlayers() faça
+                se v.Character e v.Character:FindFirstChild("HumanoidRootPart") então
+                    v.Character.HumanoidRootPart.Size = Vector3.new(2, 2, 1) -- Redefinir para o tamanho padrão
+                    v.Character.HumanoidRootPart.Transparency = 1 -- Redefinir transparência
+                fim
+            fim
+        fim
+        print("Hitboxes habilitados:", Valor)
+        aplicarHitboxChanges()
+    fim    
 })
 
-Tabs.Main:AddToggle("infjump", {
-    Title = "Infinite Jump",
-    Description = "Ativa/desativa o pulo infinito",
-    Default = false,
-    Callback = function(state)
-        notify(
-            state and "Infinite Jump Ativado" or "Infinite Jump Desativado", 
-            state and "Pulo infinito ativado com sucesso!" or "Pulo infinito desativado."
-        )
-        toggleInfiniteJump(state)
-    end
+-- Controle deslizante para alterar o tamanho da hitbox (máx. estendido para 10000)
+HitboxTab:AdicionarSlider({
+    Nome = "Tamanho do Hitbox",
+    Mínimo = 2,
+    Máx = 10000,
+    Padrão = 30,
+    Cor = Color3.fromRGB(255,255,255),
+    Incremento = 1,
+    ValueName = "Tamanho",
+    Retorno de chamada = função(Valor)
+        _G.HeadSize = Valor
+        print("Tamanho do Hitbox definido como:", Valor)
+    fim    
 })
 
--- Função para definir a gravidade com base no valor digitado
-Tabs.Main:AddTextbox({
-    Name = "Gravidade",
-    Default = "196.2",  -- Valor padrão de gravidade no Roblox
-    TextDisappear = true,
-    Callback = function(value)
-        local gravityValue = tonumber(value)
-        if gravityValue then
-            -- Ajusta a gravidade do jogo
-            game.Workspace.Gravity = gravityValue
-            notify("Gravidade", "Foi ajustada para " .. value .. ".")
-        else
-            notify("Erro", "Por favor, digite um valor numérico para gravidade.")
-        end
-    end
+-- Controle deslizante para alterar a transparência da hitbox
+HitboxTab:AdicionarSlider({
+    Nome = "Transparência do Hitbox",
+    Mín = 0,
+    Máx = 1,
+    Padrão = 0,7,
+    Cor = Color3.fromRGB(255,255,255),
+    Incremento = 0,1,
+    ValueName = "Transparência",
+    Retorno de chamada = função(Valor)
+        _G.Transparência = Valor
+        print("Transparência do Hitbox definida como:", Valor)
+    fim    
 })
 
-Tabs.Main:AddSlider("JumpPower", {
-    Title = "Ajustar pulo",
-    Description = "Define a altura do pulo",
-    Default = 50,
-    Min = 0,
-    Max = 200,
-    Rounding = 1,
-    Callback = function(value)
-        setHumanoidProperty("JumpPower", value)
-    end
+-- Alternar para mostrar hitboxes (alterar cor/material)
+HitboxTab:AdicionarAlternar({
+    Nome = "Mostrar Hitboxes",
+    Padrão = falso,
+    Retorno de chamada = função(Valor)
+        _G.ShowHitboxes = Valor
+        print("Mostrar Hitboxes:", Valor)
+        para i,v no próximo, jogo:GetService('Players'):GetPlayers() faça
+            se v.Name ~= game:GetService('Players').LocalPlayer.Name e v.Character então
+                pcall(função()
+                    se _G.ShowHitboxes então
+                        v.Character.HumanoidRootPart.BrickColor = BrickColor.new("Muito azul")
+                        v.Character.HumanoidRootPart.Material = "Neon"
+                    outro
+                        v.Character.HumanoidRootPart.BrickColor = BrickColor.new("Branco institucional")
+                        v.Character.HumanoidRootPart.Material = "Plástico"
+                    fim
+                fim)
+            fim
+        fim
+    fim    
 })
 
-Tabs.Main:AddSlider("WalkSpeed", {
-    Title = "Velocidade",
-    Description = "Define a velocidade do jogador",
-    Default = 20,
-    Min = 0,
-    Max = 200,
-    Rounding = 1,
-    Callback = function(value)
-        setHumanoidProperty("WalkSpeed", value)
-    end
+-- Aba adicional para scripts extras
+local ScriptsTab = Janela:CriarTab({
+    Nome = "Scripts",
+    Ícone = "rbxassetid://4483345998",
+    PremiumOnly = falso
 })
 
-Tabs.Main:AddButton({
-    Name = "Resetar Velocidade Pulo e Gravidade",
-    Callback = function()
-        local player = game.Players.LocalPlayer
-        local character = player.Character or player.CharacterAdded:Wait()
-        local humanoid = character:FindFirstChildOfClass("Humanoid")
+-- Função para adicionar botões de script
+função local addScriptButton(nome, url)
+    Guia Scripts:AdicionarBotão({
+        Nome = nome,
+        Retorno de chamada = função()
+            loadstring(jogo:HttpGet(url))()
+            print(nome .. "Lançado")
+        fim    
+    })
+fim
 
-        if humanoid then
-            humanoid.WalkSpeed = 20 -- Velocidade padrão do Roblox
-            humanoid.JumpPower = 50 -- Altura do pulo padrão do Roblox
-            game.Workspace.Gravity = 196.2  -- Gravidade padrão do Roblox
-            notify("Resetado", "Velocidade  Altura do Pulo e Gravidade foram resetadas!")
-        else
-            notify("Erro", "não encontrado!")
-        end
-    end
+-- Adicionando todos os scripts como botões
+addScriptButton("Lançar Rendimento Infinito", 'loadstring(game:HttpGet('https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source'))()
+addScriptButton("Iniciar airhub", 'loadstring(game:HttpGet("https://raw.githubusercontent.com/Exunys/AirHub-V2/main/src/Main.lua"))()
+addScriptButton("Lançar arsenal", 'loadstring(game:HttpGet('https://raw.githubusercontent.com/AFGCLIENT/Snyware/main/Loader'))()
+addScriptButton("Lançar fruta blox", 'loadstring(game:HttpGet(("https://raw.githubusercontent.com/koonpeatch/PeatEX/master/BKHAX/BloxFruits"),true))()
+addScriptButton("Abrir portas", 'loadstring(game:HttpGet("https://raw.githubusercontent.com/KINGHUB01/BlackKing-obf/main/Doors%20Blackking%20And%20BobHub"))()
+addScriptButton("Iniciar ez hub", 'loadstring(game:HttpGet(('https://raw.githubusercontent.com/debug42O/Ez-Industries-Launcher-Data/master/Launcher.lua'),true))()
+addScriptButton("Lançar simulador de pés", 'loadstring(game:HttpGet("https://pastebin.com/raw/jtLYTQmg"))()
+addScriptButton("Lançar rivais", 'loadstring(game:HttpGet("https://raw.githubusercontent.com/cracklua/cracks/m/SilentRivals"))()
+addScriptButton("Iniciar prizzlife", 'https://raw.githubusercontent.com/elliexmln/PrizzLife/main/pladmin.lua
+addScriptButton("Iniciar spacehub", 'loadstring(game:HttpGet("https://orbituniverse.com/spacehub"))()
+addScriptButton("Iniciar redz hub mobile (blox fruit)", 'loadstring(game:HttpGet("https://raw.githubusercontent.com/REDzHUB/BloxFruits/main/redz9999"))()
+
+
+-- Adicionando um rótulo de texto para "Feito por Fraise LE BG e Neyrozz"
+rótulo local = Instance.new("TextLabel")
+rótulo.Parent = Janela.Principal
+rótulo.Tamanho = UDim2.novo(0, 200, 0, 50)
+label.Position = UDim2.new(0.5, -100, 0, 10) -- Centralizado no topo
+label.Text = "Feito por Fraise LE BG"
+rótulo.TextColor3 = Cor3.novo(1, 1, 1)
+rótulo.BackgroundTransparency = 1
+rótulo.Fonte = Enum.Fonte.SourceSans
+rótulo.TextSize = 18
+
+-- Integração do Fraise's Rivals Hub Fly
+local FlyEnabled = falso
+função local Fly()
+    jogador local = jogo.Jogadores.JogadorLocal
+    mouse local = jogador:GetMouse()
+    local HumanoidRootPart = jogador.Personagem:FindFirstChild("HumanoidRootPart")
+
+    voo local = falso
+    velocidade local = 50
+    bp local = Instância.new("PosiçãoCorpo")
+    bg local = Instância.new("BodyGyro")
+    pb.P = 9e4
+    bp.maxForce = Vetor3.novo(9e4, 9e4, 9e4)
+    bp.position = HumanoidRootPart.Posição
+    bg.maxTorque = Vetor3.novo(9e4, 9e4, 9e4)
+    bg.cframe = HumanoidRootPart.CFrame
+
+    bp.Parent = HumanoidRootPart
+    bg.Parent = HumanoidRootPart
+
+    voando = verdadeiro
+    jogo:GetService('RunService').RenderStepped:Connect(função()
+        se voar então
+            bp.position = HumanoidRootPart.Position + (HumanoidRootPart.CFrame.lookVector * (velocidade / 5))
+            HumanoidRootPart.Velocity = Vetor3.novo(0, 0, 0)
+        fim
+    fim)
+
+    mouse.KeyDown:Connect(função(tecla)
+        se a tecla == "q" então -- desativa o fly
+            voando = falso
+            bp:Destruir()
+            bg:Destruir()
+        fim
+    fim)
+fim
+
+-- Adicionar Fly Toggle ao Rivals Hub na Self Tab
+local FraisesScriptsTab = Janela:CriarTab({
+    Nome = "Scripts de Fraise",
+    Ícone = "rbxassetid://4483345998",
+    PremiumOnly = falso
 })
 
--- Aba: Jogadores
-Tabs.Players:AddParagraph({ Title = "ESP", Content = "funcionar alguns servidores" })
-
--- Aba: Jogadores
-Tabs.Players:AddButton({
-    Title = "ESP Nome",
-    Callback = function()
-        loadstring(game:HttpGet("https://pastebin.com/raw/rSUGN1fK"))()
-    end
+FraisesScriptsTab:AdicionarBotão({
+    Nome = "Fraise Rivals Hub",
+    Retorno de chamada = função()
+        -- Funcionalidade Rivals Fly
+        Voar()
+        print("Função de voo do Rivals Hub ativada.")
+    fim
 })
 
--- Aba: Jogadores
-Tabs.Players:AddButton({
-    Title = "ESP Linhas",
-    Callback = function()
-        loadstring(game:HttpGet("https://pastebin.com/raw/nnHbfvGW"))()
-    end
-})
+-- Inicializar a GUI
+OrionLib:Init()
