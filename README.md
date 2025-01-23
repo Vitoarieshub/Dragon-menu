@@ -1,8 +1,8 @@
--- Áries Hub - Versão Universal
--- Desenvolvido por Vitor
+-- Dragão menu [Beta]
+-- Desenvolvido por Victor 
 -- Script otimizado e organizado
 
--- Carregar Script Fluent
+-- Carregar Fluent
 local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
 
 -- Função para enviar notificações
@@ -10,25 +10,24 @@ local function notify(title, content)
     Fluent:Notify({ Title = title, Content = content })
 end
 
--- Aviso de execução
+-- Aviso ao executar
 notify("Executado!", "Script executado com sucesso.")
 
 -- Criar a janela principal
 local Window = Fluent:CreateWindow({
-    Title = "Áries Hub | Versão: Universal " .. Fluent.Version,
-    TabWidth = 40,
+    Title = "Dragão menu [Beta] " .. Fluent.Version,
+    TabWidth = 90,
     Size = UDim2.fromOffset(420, 310),
     Theme = "Dark"
 })
 
--- Tabela de abas
+-- Abas do menu
 local Tabs = {
     Main = Window:AddTab({ Title = "Início" }),
     Players = Window:AddTab({ Title = "Jogadores" }),
-    Vehicle = Window:AddTab({ Title = "Veículos" }),
 }
 
--- Funções utilitárias
+-- Funções gerais
 local function setHumanoidProperty(property, value)
     local player = game.Players.LocalPlayer
     local character = player.Character or player.CharacterAdded:Wait()
@@ -37,7 +36,7 @@ local function setHumanoidProperty(property, value)
     print(property .. " ajustado para:", value)
 end
 
--- Pulo infinito
+-- Infinite Jump
 local jumpConnection
 local function toggleInfiniteJump(enable)
     if enable then
@@ -83,13 +82,38 @@ local function toggleNoclip(enable)
     end
 end
 
+-- Funções de espectador
+local function spectatePlayer(playerName)
+    local player = game.Players:FindFirstChild(playerName)
+    if player and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+        workspace.CurrentCamera.CameraSubject = player.Character.HumanoidRootPart
+        notify("Espectador", "Você está agora espectando: " .. playerName)
+    else
+        notify("Erro", "Jogador não encontrado.")
+    end
+end
+
+local function stopSpectating()
+    workspace.CurrentCamera.CameraSubject = game.Players.LocalPlayer.Character:WaitForChild("Humanoid")
+    notify("Espectador", "Você parou de espectar o jogador.")
+end
+
+-- Atualizar lista de jogadores
+local function updatePlayerList(dropdown)
+    local playerNames = {}
+    for _, player in ipairs(game.Players:GetPlayers()) do
+        table.insert(playerNames, player.Name)
+    end
+    dropdown:Refresh(playerNames, true)
+end
+
 -- Aba: Início
-Tabs.Main:AddParagraph({ Title = "Desenvolvedor: Vitor", Content = "Scripts personalizados e otimizados." })
+Tabs.Main:AddParagraph({ Title = "Programador Victor", Content = "Scripts personalizados" })
 
 Tabs.Main:AddButton({
     Title = "Fly",
     Callback = function()
-        loadstring(game:HttpGet("https://pastebin.com/raw/YSL3xKYU"))()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/Vitoarieshub/Fly-universal-/refs/heads/main/README.md"))()
     end
 })
 
@@ -101,19 +125,21 @@ Tabs.Main:AddToggle("noclip", {
 })
 
 Tabs.Main:AddToggle("infjump", {
-    Title = "Pulo Infinito",
+    Title = "Infinite Jump",
     Description = "Ativa/desativa o pulo infinito",
     Default = false,
     Callback = function(state)
-        notify(state and "Pulo Infinito Ativado" or "Pulo Infinito Desativado", 
-               state and "Agora você pode pular infinitamente!" or "Pulo infinito foi desativado.")
+        notify(
+            state and "Infinite Jump Ativado" or "Infinite Jump Desativado", 
+            state and "Pulo infinito ativado com sucesso!" or "Pulo infinito desativado."
+        )
         toggleInfiniteJump(state)
     end
 })
 
 Tabs.Main:AddSlider("JumpPower", {
-    Title = "Altura do Pulo",
-    Description = "Ajusta a altura do pulo",
+    Title = "Ajustar pulo",
+    Description = "Define a altura do pulo",
     Default = 50,
     Min = 0,
     Max = 200,
@@ -125,10 +151,10 @@ Tabs.Main:AddSlider("JumpPower", {
 
 Tabs.Main:AddSlider("WalkSpeed", {
     Title = "Velocidade",
-    Description = "Ajusta a velocidade do jogador",
-    Default = 16,
+    Description = "Define a velocidade do jogador",
+    Default = 20,
     Min = 0,
-    Max = 100,
+    Max = 200,
     Rounding = 1,
     Callback = function(value)
         setHumanoidProperty("WalkSpeed", value)
@@ -136,31 +162,56 @@ Tabs.Main:AddSlider("WalkSpeed", {
 })
 
 -- Aba: Jogadores
+Tabs.Players:AddParagraph({ Title = "ESP", Content = "Funciona em alguns servidores" })
+
 Tabs.Players:AddButton({
-    Title = "ESP Universal",
+    Title = "ESP Nome",
     Callback = function()
         loadstring(game:HttpGet("https://pastebin.com/raw/rSUGN1fK"))()
     end
 })
 
 Tabs.Players:AddButton({
-    Title = "Teleporte Universal",
+    Title = "ESP Linhas",
     Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/Infinity2346/Tect-Menu/main/Teleport%20Gui.lua"))()
+        loadstring(game:HttpGet("https://pastebin.com/raw/nnHbfvGW"))()
     end
 })
 
+-- Dropdown para espectar jogadores
+local playerDropdown = Tabs.Players:AddDropdown({
+    Title = "Espectar Jogador",
+    Options = {},
+    Callback = function(selectedPlayer)
+        spectatePlayer(selectedPlayer)
+    end
+})
+
+-- Botão para atualizar a lista de jogadores
 Tabs.Players:AddButton({
-    Title = "BringParts",
+    Title = "Atualizar Lista de Jogadores",
     Callback = function()
-        loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Better-Bring-Parts-Ui-SOLARA-and-Fixed-Lags-21780"))()
+        updatePlayerList(playerDropdown)
+        notify("Lista Atualizada", "Lista de jogadores foi atualizada!")
     end
 })
 
--- Aba: Veículos
-Tabs.Vehicle:AddButton({
-    Title = "Fly Car",
+-- Botão para parar de espectar
+Tabs.Players:AddButton({
+    Title = "Parar de Espectar",
     Callback = function()
-        loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Fly-Car-Mobile-gui-11884"))()
+        stopSpectating()
     end
 })
+
+-- Inicializar lista de jogadores
+updatePlayerList(playerDropdown)
+
+-- Atualizar lista ao adicionar/remover jogadores
+game.Players.PlayerAdded:Connect(function()
+    updatePlayerList(playerDropdown)
+end)
+
+game.Players.PlayerRemoving:Connect(function()
+    updatePlayerList(playerDropdown)
+end)
