@@ -1,6 +1,6 @@
 -- Dragão menu [Beta]
 -- Desenvolvido por Victor 
--- Script otimizado e organizado
+-- Script otimizado 
 
 -- Carregar Fluent
 local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
@@ -21,13 +21,13 @@ local Window = Fluent:CreateWindow({
     Theme = "Dark"
 })
 
--- Abas do menu
+-- Tabela de abas
 local Tabs = {
     Main = Window:AddTab({ Title = "Início" }),
     Players = Window:AddTab({ Title = "Jogadores" }),
 }
 
--- Funções gerais
+-- Funções utilitárias
 local function setHumanoidProperty(property, value)
     local player = game.Players.LocalPlayer
     local character = player.Character or player.CharacterAdded:Wait()
@@ -82,31 +82,6 @@ local function toggleNoclip(enable)
     end
 end
 
--- Funções de espectador
-local function spectatePlayer(playerName)
-    local player = game.Players:FindFirstChild(playerName)
-    if player and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-        workspace.CurrentCamera.CameraSubject = player.Character.HumanoidRootPart
-        notify("Espectador", "Você está agora espectando: " .. playerName)
-    else
-        notify("Erro", "Jogador não encontrado.")
-    end
-end
-
-local function stopSpectating()
-    workspace.CurrentCamera.CameraSubject = game.Players.LocalPlayer.Character:WaitForChild("Humanoid")
-    notify("Espectador", "Você parou de espectar o jogador.")
-end
-
--- Atualizar lista de jogadores
-local function updatePlayerList(dropdown)
-    local playerNames = {}
-    for _, player in ipairs(game.Players:GetPlayers()) do
-        table.insert(playerNames, player.Name)
-    end
-    dropdown:Refresh(playerNames, true)
-end
-
 -- Aba: Início
 Tabs.Main:AddParagraph({ Title = "Programador Victor", Content = "Scripts personalizados" })
 
@@ -137,6 +112,23 @@ Tabs.Main:AddToggle("infjump", {
     end
 })
 
+-- Função para definir a gravidade com base no valor digitado
+Tabs.Main:AddTextbox({
+    Name = "Gravidade",
+    Default = "196.2",  -- Valor padrão de gravidade no Roblox
+    TextDisappear = true,
+    Callback = function(value)
+        local gravityValue = tonumber(value)
+        if gravityValue then
+            -- Ajusta a gravidade do jogo
+            game.Workspace.Gravity = gravityValue
+            notify("Gravidade", "Foi ajustada para " .. value .. ".")
+        else
+            notify("Erro", "Por favor, digite um valor numérico para gravidade.")
+        end
+    end
+})
+
 Tabs.Main:AddSlider("JumpPower", {
     Title = "Ajustar pulo",
     Description = "Define a altura do pulo",
@@ -161,9 +153,28 @@ Tabs.Main:AddSlider("WalkSpeed", {
     end
 })
 
--- Aba: Jogadores
-Tabs.Players:AddParagraph({ Title = "ESP", Content = "Funciona em alguns servidores" })
+Tabs.Main:AddButton({
+    Name = "Resetar Velocidade Pulo e Gravidade",
+    Callback = function()
+        local player = game.Players.LocalPlayer
+        local character = player.Character or player.CharacterAdded:Wait()
+        local humanoid = character:FindFirstChildOfClass("Humanoid")
 
+        if humanoid then
+            humanoid.WalkSpeed = 20 -- Velocidade padrão do Roblox
+            humanoid.JumpPower = 50 -- Altura do pulo padrão do Roblox
+            game.Workspace.Gravity = 196.2  -- Gravidade padrão do Roblox
+            notify("Resetado", "Velocidade  Altura do Pulo e Gravidade foram resetadas!")
+        else
+            notify("Erro", "não encontrado!")
+        end
+    end
+})
+
+-- Aba: Jogadores
+Tabs.Players:AddParagraph({ Title = "ESP", Content = "funcionar alguns servidores" })
+
+-- Aba: Jogadores
 Tabs.Players:AddButton({
     Title = "ESP Nome",
     Callback = function()
@@ -171,47 +182,10 @@ Tabs.Players:AddButton({
     end
 })
 
+-- Aba: Jogadores
 Tabs.Players:AddButton({
     Title = "ESP Linhas",
     Callback = function()
         loadstring(game:HttpGet("https://pastebin.com/raw/nnHbfvGW"))()
     end
 })
-
--- Dropdown para espectar jogadores
-local playerDropdown = Tabs.Players:AddDropdown({
-    Title = "Espectar Jogador",
-    Options = {},
-    Callback = function(selectedPlayer)
-        spectatePlayer(selectedPlayer)
-    end
-})
-
--- Botão para atualizar a lista de jogadores
-Tabs.Players:AddButton({
-    Title = "Atualizar Lista de Jogadores",
-    Callback = function()
-        updatePlayerList(playerDropdown)
-        notify("Lista Atualizada", "Lista de jogadores foi atualizada!")
-    end
-})
-
--- Botão para parar de espectar
-Tabs.Players:AddButton({
-    Title = "Parar de Espectar",
-    Callback = function()
-        stopSpectating()
-    end
-})
-
--- Inicializar lista de jogadores
-updatePlayerList(playerDropdown)
-
--- Atualizar lista ao adicionar/remover jogadores
-game.Players.PlayerAdded:Connect(function()
-    updatePlayerList(playerDropdown)
-end)
-
-game.Players.PlayerRemoving:Connect(function()
-    updatePlayerList(playerDropdown)
-end)
