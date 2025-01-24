@@ -169,6 +169,15 @@ Tabs.Players:AddButton({
     end
 })
 
+Tabs.Players:AddParagraph({ Title = "Teleport", Content = "Funciona em todos os servidores" })
+
+Tabs.Players:AddButton({
+    Title = "Teleport",
+    Callback = function()
+        loadstring(game:HttpGet('https://raw.githubusercontent.com/Infinity2346/Tect-Menu/main/Teleport%20Gui.lua'))()
+    end
+})
+
 -- Aba: Configuração
 Tabs.Settings:AddButton({
     Title = "Anti Kick",
