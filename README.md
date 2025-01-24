@@ -1,6 +1,6 @@
--- Dragão menu [Beta]
--- Desenvolvido por Victor 
--- Script otimizado 
+-- Dragon menu [Beta]
+-- Desenvolvido por Victor
+-- Script otimizado
 
 -- Carregar Fluent
 local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
@@ -15,7 +15,7 @@ notify("Executado!", "Script executado com sucesso.")
 
 -- Criar a janela principal
 local Window = Fluent:CreateWindow({
-    Title = "Dragão menu [Beta] " .. Fluent.Version,
+    Title = "Dragon menu [Beta] " .. Fluent.Version,
     TabWidth = 90,
     Size = UDim2.fromOffset(420, 310),
     Theme = "Dark"
@@ -23,9 +23,9 @@ local Window = Fluent:CreateWindow({
 
 -- Tabela de abas
 local Tabs = {
-    Main = Window:AddTab({ Title = "Início" }),
-    Players = Window:AddTab({ Title = "Jogadores" }),
-    Settings = Window:AddTab({ Title = "Configuração" }) -- Nome correto da aba
+    Main = Window:AddTab({ Title = "Main" }),
+    Players = Window:AddTab({ Title = "Players" }),
+    Settings = Window:AddTab({ Title = "Config" })
 }
 
 -- Funções utilitárias
@@ -83,7 +83,7 @@ local function toggleNoclip(enable)
     end
 end
 
--- Aba: Início
+-- Aba: Main
 Tabs.Main:AddParagraph({ Title = "Programador Victor", Content = "Scripts personalizados" })
 
 Tabs.Main:AddButton({
@@ -106,15 +106,28 @@ Tabs.Main:AddToggle("infjump", {
     Default = false,
     Callback = function(state)
         notify(
-            state and "Infinite Jump Ativado" or "Infinite Jump Desativado", 
+            state and "Infinite Jump Ativado" or "Infinite Jump Desativado",
             state and "Pulo infinito ativado com sucesso!" or "Pulo infinito desativado."
         )
         toggleInfiniteJump(state)
     end
 })
 
+Tabs.Main:AddSlider("Gravity", {
+    Title = "Gravidade",
+    Description = "Ajusta a gravidade do jogo",
+    Default = 196.2, -- Gravidade padrão no Roblox
+    Min = 0,
+    Max = 500,
+    Rounding = 1,
+    Callback = function(value)
+        game.Workspace.Gravity = value
+        notify("Gravidade", "Foi ajustada para: " .. value)
+    end
+})
+
 Tabs.Main:AddSlider("JumpPower", {
-    Title = "Ajustar pulo",
+    Title = "JumpPower",
     Description = "Define a altura do pulo",
     Default = 50,
     Min = 0,
@@ -126,7 +139,7 @@ Tabs.Main:AddSlider("JumpPower", {
 })
 
 Tabs.Main:AddSlider("WalkSpeed", {
-    Title = "Velocidade",
+    Title = "WalkSpeed",
     Description = "Define a velocidade do jogador",
     Default = 20,
     Min = 0,
@@ -137,7 +150,7 @@ Tabs.Main:AddSlider("WalkSpeed", {
     end
 })
 
--- Aba: Jogadores
+-- Aba: Players
 Tabs.Players:AddParagraph({ Title = "ESP", Content = "Funciona em alguns servidores" })
 
 Tabs.Players:AddButton({
@@ -151,6 +164,13 @@ Tabs.Players:AddButton({
     Title = "ESP Linhas",
     Callback = function()
         loadstring(game:HttpGet("https://pastebin.com/raw/nnHbfvGW"))()
+    end
+})
+
+Tabs.Players:AddButton({
+    Title = "Teleport",
+    Callback = function()
+        loadstring(game:HttpGet('https://raw.githubusercontent.com/Infinity2346/Tect-Menu/main/Teleport%20Gui.lua'))()
     end
 })
 
