@@ -25,7 +25,7 @@ local Window = Fluent:CreateWindow({
 local Tabs = {
     Main = Window:AddTab({ Title = "Início" }),
     Players = Window:AddTab({ Title = "Jogadores" }),
-    Settings = Window:AddTab({ Title = "Configuração", Icon = "settings" })
+    Settings = Window:AddTab({ Title = "Configuração" }) -- Nome correto da aba
 }
 
 -- Funções utilitárias
@@ -138,9 +138,8 @@ Tabs.Main:AddSlider("WalkSpeed", {
 })
 
 -- Aba: Jogadores
-Tabs.Players:AddParagraph({ Title = "ESP", Content = "funcionar alguns servidores" })
+Tabs.Players:AddParagraph({ Title = "ESP", Content = "Funciona em alguns servidores" })
 
--- Aba: Jogadores
 Tabs.Players:AddButton({
     Title = "ESP Nome",
     Callback = function()
@@ -148,7 +147,6 @@ Tabs.Players:AddButton({
     end
 })
 
--- Aba: Jogadores
 Tabs.Players:AddButton({
     Title = "ESP Linhas",
     Callback = function()
@@ -157,9 +155,10 @@ Tabs.Players:AddButton({
 })
 
 -- Aba: Configuração
-Tabs.Configuração:AddButton({
+Tabs.Settings:AddButton({
     Title = "Anti Kick",
     Callback = function()
-        https://raw.githubusercontent.com/Exunys/Anti-Kick/main/Anti-Kick.lua
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/Exunys/Anti-Kick/main/Anti-Kick.lua"))()
+        notify("Anti Kick Ativado", "Proteção contra kick foi ativada.")
     end
 })
