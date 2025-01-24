@@ -29,7 +29,7 @@ local Window = Fluent:CreateWindow({
 local Tabs = {
     Main = Window:AddTab({ Title = "Main" }),
     Players = Window:AddTab({ Title = "Players" }),
-    Settings = Window:AddTab({ Title = "Config" }) -- Nome correto da aba
+    Settings = Window:AddTab({ Title = "Config" })
 }
 
 -- Funções utilitárias
@@ -125,7 +125,6 @@ Tabs.Main:AddSlider("Gravity", {
     Max = 500,
     Rounding = 1,
     Callback = function(value)
-        -- Define a gravidade do jogo
         game.Workspace.Gravity = value
         notify("Gravidade", "Foi ajustada para: " .. value)
     end
@@ -156,8 +155,6 @@ Tabs.Main:AddSlider("WalkSpeed", {
 })
 
 -- Aba: Jogadores
-Tabs.Players:AddParagraph({ Title = "ESP", Content = "Funciona em alguns servidores" })
-
 Tabs.Players:AddButton({
     Title = "ESP Nome",
     Callback = function()
@@ -172,20 +169,41 @@ Tabs.Players:AddButton({
     end
 })
 
-Tabs.Players:AddParagraph({ Title = "Teleport", Content = "Funciona em todos os servidores" })
-
-Tabs.Players:AddButton({
-    Title = "Teleport",
-    Callback = function()
-        loadstring(game:HttpGet('https://raw.githubusercontent.com/Infinity2346/Tect-Menu/main/Teleport%20Gui.lua'))()
-    end
-})
-
 -- Aba: Configuração
 Tabs.Settings:AddButton({
     Title = "Anti Kick",
     Callback = function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/Exunys/Anti-Kick/main/Anti-Kick.lua"))()
         notify("Anti Kick Ativado", "Proteção contra kick foi ativada.")
+    end
+})
+
+local safePosition = Vector3.new(0, 50, 0) -- Posição segura no mapa
+local voidLimit = -300
+local maxHeight = 300
+local isAntiVoidActive = false
+
+local function checkVoid()
+    local humanoidRootPart = game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+    if humanoidRootPart then
+        local pos = humanoidRootPart.Position
+        if pos.Y < voidLimit or pos.Y > maxHeight then
+            humanoidRootPart.CFrame = CFrame.new(safePosition)
+        end
+    end
+end
+
+game:GetService("RunService").Stepped:Connect(function()
+    if isAntiVoidActive then
+        checkVoid()
+    end
+end)
+
+Tabs.Settings:AddToggle("Anti Void", {
+    Title = "Anti Void",
+    Description = "Ativa/desativa a Anti void",
+    Default = false,
+    Callback = function(state)
+        isAntiVoidActive = state
     end
 })
