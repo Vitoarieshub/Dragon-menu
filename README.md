@@ -1,13 +1,17 @@
 -- Dragon menu [Beta]
--- Desenvolvido por Victor
--- Script otimizado
+-- Desenvolvido por Victor 
+-- Script otimizado 
 
 -- Carregar Fluent
 local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
 
 -- Função para enviar notificações
 local function notify(title, content)
-    Fluent:Notify({ Title = title, Content = content })
+    Fluent:Notify({
+        Title = title,
+        Content = content,
+        Duration = 3 -- Define a duração da notificação para 3 segundos
+    })
 end
 
 -- Aviso ao executar
@@ -25,7 +29,7 @@ local Window = Fluent:CreateWindow({
 local Tabs = {
     Main = Window:AddTab({ Title = "Main" }),
     Players = Window:AddTab({ Title = "Players" }),
-    Settings = Window:AddTab({ Title = "Config" })
+    Settings = Window:AddTab({ Title = "Config" }) -- Nome correto da aba
 }
 
 -- Funções utilitárias
@@ -83,7 +87,7 @@ local function toggleNoclip(enable)
     end
 end
 
--- Aba: Main
+-- Aba: Início
 Tabs.Main:AddParagraph({ Title = "Programador Victor", Content = "Scripts personalizados" })
 
 Tabs.Main:AddButton({
@@ -106,7 +110,7 @@ Tabs.Main:AddToggle("infjump", {
     Default = false,
     Callback = function(state)
         notify(
-            state and "Infinite Jump Ativado" or "Infinite Jump Desativado",
+            state and "Infinite Jump Ativado" or "Infinite Jump Desativado", 
             state and "Pulo infinito ativado com sucesso!" or "Pulo infinito desativado."
         )
         toggleInfiniteJump(state)
@@ -115,12 +119,13 @@ Tabs.Main:AddToggle("infjump", {
 
 Tabs.Main:AddSlider("Gravity", {
     Title = "Gravidade",
-    Description = "Ajusta a gravidade do jogo",
+    Description = "Ajusta a gravidade do jogador",
     Default = 196.2, -- Gravidade padrão no Roblox
     Min = 0,
     Max = 500,
     Rounding = 1,
     Callback = function(value)
+        -- Define a gravidade do jogo
         game.Workspace.Gravity = value
         notify("Gravidade", "Foi ajustada para: " .. value)
     end
@@ -150,7 +155,7 @@ Tabs.Main:AddSlider("WalkSpeed", {
     end
 })
 
--- Aba: Players
+-- Aba: Jogadores
 Tabs.Players:AddParagraph({ Title = "ESP", Content = "Funciona em alguns servidores" })
 
 Tabs.Players:AddButton({
@@ -166,6 +171,8 @@ Tabs.Players:AddButton({
         loadstring(game:HttpGet("https://pastebin.com/raw/nnHbfvGW"))()
     end
 })
+
+Tabs.Players:AddParagraph({ Title = "Teleport", Content = "Funciona em todos os servidores" })
 
 Tabs.Players:AddButton({
     Title = "Teleport",
