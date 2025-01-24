@@ -25,6 +25,7 @@ local Window = Fluent:CreateWindow({
 local Tabs = {
     Main = Window:AddTab({ Title = "Início" }),
     Players = Window:AddTab({ Title = "Jogadores" }),
+    Settings = Window:AddTab({ Title = "Configuração", Icon = "settings" })
 }
 
 -- Funções utilitárias
@@ -112,21 +113,6 @@ Tabs.Main:AddToggle("infjump", {
     end
 })
 
-Tabs.Main:AddTextbox({
-    Name = "Gravidade",
-    Default = "196.2",  -- Valor padrão de gravidade no Roblox
-    TextDisappear = true,
-    Callback = function(value)
-        local gravityValue = tonumber(value)
-        if gravityValue then
-            game.Workspace.Gravity = gravityValue
-            notify("Gravidade", "Foi ajustada para " .. value .. ".")
-        else
-            notify("Erro", "Por favor, digite um valor numérico para gravidade.")
-        end
-    end
-})
-
 Tabs.Main:AddSlider("JumpPower", {
     Title = "Ajustar pulo",
     Description = "Define a altura do pulo",
@@ -151,27 +137,10 @@ Tabs.Main:AddSlider("WalkSpeed", {
     end
 })
 
-Tabs.Main:AddButton({
-    Title = "Resetar Velocidade, Pulo e Gravidade",
-    Callback = function()
-        local player = game.Players.LocalPlayer
-        local character = player.Character or player.CharacterAdded:Wait()
-        local humanoid = character:FindFirstChildOfClass("Humanoid")
-
-        if humanoid then
-            humanoid.WalkSpeed = 20
-            humanoid.JumpPower = 50
-            game.Workspace.Gravity = 196.2
-            notify("Resetado", "Velocidade, Altura do Pulo e Gravidade foram resetadas!")
-        else
-            notify("Erro", "Humanoid não encontrado!")
-        end
-    end
-})
+-- Aba: Jogadores
+Tabs.Players:AddParagraph({ Title = "ESP", Content = "funcionar alguns servidores" })
 
 -- Aba: Jogadores
-Tabs.Players:AddParagraph({ Title = "ESP", Content = "Funciona em alguns servidores" })
-
 Tabs.Players:AddButton({
     Title = "ESP Nome",
     Callback = function()
@@ -179,9 +148,68 @@ Tabs.Players:AddButton({
     end
 })
 
+-- Aba: Jogadores
 Tabs.Players:AddButton({
     Title = "ESP Linhas",
     Callback = function()
         loadstring(game:HttpGet("https://pastebin.com/raw/nnHbfvGW"))()
+    end
+})
+
+-- Aba: Configuração
+Tabs.Configuração:AddButton({
+    Title = "Anti Kick",
+    Callback = function()
+        https://raw.githubusercontent.com/Exunys/Anti-Kick/main/Anti-Kick.lua
+    end
+})
+
+-- Função para aplicar o boost de FPS
+local function applyFPSBoost()
+    settings().Rendering.QualityLevel = Enum.QualityLevel.Level01
+    game:GetService("Lighting").GlobalShadows = false
+
+    for _, v in pairs(game:GetService("Workspace"):GetDescendants()) do
+        if v:IsA("Part") or v:IsA("UnionOperation") or v:IsA("MeshPart") then
+            v.Material = Enum.Material.SmoothPlastic
+            v.Reflectance = 0
+        elseif v:IsA("Decal") or v:IsA("Texture") then
+            v:Destroy()
+        elseif v:IsA("ParticleEmitter") or v:IsA("Trail") then
+            v:Destroy()
+        elseif v:IsA("PointLight") or v:IsA("SpotLight") or v:IsA("SurfaceLight") then
+            v:Destroy()
+        end
+    end
+
+    game:GetService("Workspace").CurrentCamera.FieldOfView = 70
+    game:GetService("Workspace").CurrentCamera.MaxDistance = 500
+    notify("FPS Boost", "Ativado com sucesso!")
+end
+
+-- Função para reverter as mudanças e voltar à qualidade normal
+local function revertFPSBoost()
+    settings().Rendering.QualityLevel = Enum.QualityLevel.Automatic
+    game:GetService("Lighting").GlobalShadows = true
+    notify("FPS Boost", "Desativado.")
+end
+
+local isFPSBoostActive = false  -- Inicia com o boost desativado
+
+-- Função para alternar entre aplicar e reverter o boost de FPS
+local function toggleFPSBoost()
+    if isFPSBoostActive then
+        revertFPSBoost()
+    else
+        applyFPSBoost()
+    end
+    isFPSBoostActive = not isFPSBoostActive
+end
+
+-- Aba: Configuração
+Tabs.Configuração:AddButton({
+    Title = "Boost FPS",
+    Callback = function()
+        https://raw.githubusercontent.com/Exunys/Anti-Kick/main/Anti-Kick.lua
     end
 })
