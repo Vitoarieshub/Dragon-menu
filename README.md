@@ -29,6 +29,7 @@ local Window = Fluent:CreateWindow({
 local Tabs = {
     Main = Window:AddTab({ Title = "Main" }),
     Players = Window:AddTab({ Title = "Players" }),
+    Exploits = Window:AddTab({ Title = "Exploits" }),
     Settings = Window:AddTab({ Title = "Config" })
 }
 
@@ -175,6 +176,21 @@ Tabs.Players:AddButton({
     Title = "Teleport",
     Callback = function()
         loadstring(game:HttpGet('https://raw.githubusercontent.com/Infinity2346/Tect-Menu/main/Teleport%20Gui.lua'))()
+    end
+})
+
+-- Aba: Exploits
+Tabs.Exploits:AddButton({
+    Title = "infiniteyield",
+    Callback = function()
+        loadstring(game:HttpGet('https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source'))()
+    end
+})
+
+Tabs.Exploits:AddButton({
+    Title = "Chat Bypass",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/AlgariBot/lua/refs/heads/Lua-Script-Executor/LocalNeverPatchedBypass.txt"))()
     end
 })
 
