@@ -1,6 +1,6 @@
 -- Dragon menu [Beta]
--- Desenvolvido por Victor 
--- Script otimizado 
+-- Desenvolvido por Victor
+-- Script otimizado
 
 -- Carregar Fluent
 local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
@@ -88,7 +88,31 @@ local function toggleNoclip(enable)
     end
 end
 
--- Aba: Início
+-- Função para checar o Void
+local safePosition = Vector3.new(0, 50, 0) -- Posição segura no mapa
+local voidLimit = -300
+local maxHeight = 300
+local isAntiVoidActive = false
+
+local function checkVoid()
+    local humanoidRootPart = game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+    if humanoidRootPart then
+        local pos = humanoidRootPart.Position
+        if pos.Y < voidLimit or pos.Y > maxHeight then
+            humanoidRootPart.CFrame = CFrame.new(safePosition)
+        end
+    end
+end
+
+game:GetService("RunService").Stepped:Connect(function()
+    if isAntiVoidActive then
+        checkVoid()
+    end
+end)
+
+-- Configuração das abas e ações
+
+-- Aba: Main
 Tabs.Main:AddParagraph({ Title = "Programador Victor", Content = "Scripts personalizados" })
 
 Tabs.Main:AddButton({
@@ -155,7 +179,7 @@ Tabs.Main:AddSlider("WalkSpeed", {
     end
 })
 
--- Aba: Jogadores
+-- Aba: Players
 Tabs.Players:AddButton({
     Title = "ESP Nome",
     Callback = function()
@@ -163,86 +187,12 @@ Tabs.Players:AddButton({
     end
 })
 
--- Variáveis principais
-local RunService = game:GetService("RunService")
-local Players = game:GetService("Players")
-local LocalPlayer = Players.LocalPlayer
-local ESPEnabled = false
-local ESPConnections = {}
-
--- Função para desenhar as linhas ESP
-local function drawESP()
-    for _, player in pairs(Players:GetPlayers()) do
-        if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-            local character = player.Character
-            local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
-            local line = Drawing.new("Line")
-            
-            -- Configuração da linha
-            line.Visible = true
-            line.Color = Color3.new(1, 1, 1) -- Branco
-            line.Thickness = 2
-
-            -- Conexão para atualizar a posição da linha
-            local connection = RunService.RenderStepped:Connect(function()
-                if ESPEnabled and humanoidRootPart and character:FindFirstChild("Humanoid") and character.Humanoid.Health > 0 then
-                    local screenPos, onScreen = workspace.CurrentCamera:WorldToViewportPoint(humanoidRootPart.Position)
-                    if onScreen then
-                        line.From = Vector2.new(workspace.CurrentCamera.ViewportSize.X / 2, workspace.CurrentCamera.ViewportSize.Y) -- Base da tela (centro inferior)
-                        line.To = Vector2.new(screenPos.X, screenPos.Y)
-                        line.Visible = true
-                    else
-                        line.Visible = false
-                    end
-                else
-                    line.Visible = false
-                end
-            end)
-
-            -- Guardar a linha e conexão para futura limpeza
-            table.insert(ESPConnections, {line = line, connection = connection})
-        end
-    end
-end
-
--- Função para limpar as linhas ESP
-local function clearESP()
-    for _, espData in pairs(ESPConnections) do
-        if espData.line then
-            espData.line:Remove()
-        end
-        if espData.connection then
-            espData.connection:Disconnect()
-        end
-    end
-    ESPConnections = {}
-end
-
--- Função para ativar/desativar o ESP
-local function toggleESP(state)
-    ESPEnabled = state
-    if ESPEnabled then
-        clearESP() -- Limpa quaisquer linhas antigas antes de recriar
-        drawESP()
-        print("ESP Linhas ativado.")
-    else
-        clearESP()
-        print("ESP Linhas desativado.")
-    end
-end
-
--- Integração com o botão toggle
 Tabs.Players:AddToggle("Esp", {
-    Title = "Esp linhas",
-    Description = "Ativa/desativa Esp",
+    Title = "Esp Linhas",
+    Description = "Ativa/desativa ESP com linhas",
     Default = false,
-    Callback = function(state)
-        toggleESP(state) -- Chama a função de ativar/desativar ESP com base no estado do toggle
-    end
+    Callback = toggleESP
 })
-
--- Mensagem inicial
-print("Script ESP Linhas carregado. Use o botão para ativar/desativar.")
 
 Tabs.Players:AddParagraph({ Title = "Teleport", Content = "Funciona em todos os servidores" })
 
@@ -255,7 +205,7 @@ Tabs.Players:AddButton({
 
 -- Aba: Exploits
 Tabs.Exploits:AddButton({
-    Title = "infiniteyield",
+    Title = "InfiniteYield",
     Callback = function()
         loadstring(game:HttpGet('https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source'))()
     end
@@ -277,32 +227,14 @@ Tabs.Settings:AddButton({
     end
 })
 
-local safePosition = Vector3.new(0, 50, 0) -- Posição segura no mapa
-local voidLimit = -300
-local maxHeight = 300
-local isAntiVoidActive = false
-
-local function checkVoid()
-    local humanoidRootPart = game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-    if humanoidRootPart then
-        local pos = humanoidRootPart.Position
-        if pos.Y < voidLimit or pos.Y > maxHeight then
-            humanoidRootPart.CFrame = CFrame.new(safePosition)
-        end
-    end
-end
-
-game:GetService("RunService").Stepped:Connect(function()
-    if isAntiVoidActive then
-        checkVoid()
-    end
-end)
-
 Tabs.Settings:AddToggle("Anti Void", {
     Title = "Anti Void",
-    Description = "Ativa/desativa a Anti void",
+    Description = "Ativa/desativa a Anti Void",
     Default = false,
     Callback = function(state)
         isAntiVoidActive = state
     end
 })
+
+-- Mensagem inicial
+notify("Dragon Menu [Beta]", "Script carregado com sucesso.")
