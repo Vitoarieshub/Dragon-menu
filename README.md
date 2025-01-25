@@ -163,12 +163,86 @@ Tabs.Players:AddButton({
     end
 })
 
-Tabs.Players:AddButton({
-    Title = "ESP Linhas",
-    Callback = function()
-        loadstring(game:HttpGet("https://pastebin.com/raw/nnHbfvGW"))()
+-- Variáveis principais
+local RunService = game:GetService("RunService")
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local ESPEnabled = false
+local ESPConnections = {}
+
+-- Função para desenhar as linhas ESP
+local function drawESP()
+    for _, player in pairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+            local character = player.Character
+            local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
+            local line = Drawing.new("Line")
+            
+            -- Configuração da linha
+            line.Visible = true
+            line.Color = Color3.new(1, 1, 1) -- Branco
+            line.Thickness = 2
+
+            -- Conexão para atualizar a posição da linha
+            local connection = RunService.RenderStepped:Connect(function()
+                if ESPEnabled and humanoidRootPart and character:FindFirstChild("Humanoid") and character.Humanoid.Health > 0 then
+                    local screenPos, onScreen = workspace.CurrentCamera:WorldToViewportPoint(humanoidRootPart.Position)
+                    if onScreen then
+                        line.From = Vector2.new(workspace.CurrentCamera.ViewportSize.X / 2, workspace.CurrentCamera.ViewportSize.Y) -- Base da tela (centro inferior)
+                        line.To = Vector2.new(screenPos.X, screenPos.Y)
+                        line.Visible = true
+                    else
+                        line.Visible = false
+                    end
+                else
+                    line.Visible = false
+                end
+            end)
+
+            -- Guardar a linha e conexão para futura limpeza
+            table.insert(ESPConnections, {line = line, connection = connection})
+        end
+    end
+end
+
+-- Função para limpar as linhas ESP
+local function clearESP()
+    for _, espData in pairs(ESPConnections) do
+        if espData.line then
+            espData.line:Remove()
+        end
+        if espData.connection then
+            espData.connection:Disconnect()
+        end
+    end
+    ESPConnections = {}
+end
+
+-- Função para ativar/desativar o ESP
+local function toggleESP(state)
+    ESPEnabled = state
+    if ESPEnabled then
+        clearESP() -- Limpa quaisquer linhas antigas antes de recriar
+        drawESP()
+        print("ESP Linhas ativado.")
+    else
+        clearESP()
+        print("ESP Linhas desativado.")
+    end
+end
+
+-- Integração com o botão toggle
+Tabs.Players:AddToggle("Esp", {
+    Title = "Esp linhas",
+    Description = "Ativa/desativa Esp",
+    Default = false,
+    Callback = function(state)
+        toggleESP(state) -- Chama a função de ativar/desativar ESP com base no estado do toggle
     end
 })
+
+-- Mensagem inicial
+print("Script ESP Linhas carregado. Use o botão para ativar/desativar.")
 
 Tabs.Players:AddParagraph({ Title = "Teleport", Content = "Funciona em todos os servidores" })
 
