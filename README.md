@@ -136,7 +136,7 @@ Tabs.Main:AddSlider("JumpPower", {
     Description = "Define a altura do pulo",
     Default = 50,
     Min = 0,
-    Max = 200,
+    Max = 400,
     Rounding = 1,
     Callback = function(value)
         setHumanoidProperty("JumpPower", value)
@@ -152,6 +152,29 @@ Tabs.Main:AddSlider("WalkSpeed", {
     Rounding = 1,
     Callback = function(value)
         setHumanoidProperty("WalkSpeed", value)
+    end
+})
+
+Tabs.Main:AddButton({
+    Title = "Resetar velocidade altura do pulo e gravidade",
+    Callback = function()
+    end
+})
+
+Tabs.Main:AddButton({
+    Title = "Resetar",
+    Callback = function()
+        -- Reseta a velocidade de caminhada para o padrão
+        setHumanoidProperty("WalkSpeed", 20)
+        
+        -- Reseta a altura do pulo para o padrão
+        setHumanoidProperty("JumpPower", 50)
+        
+        -- Reseta a gravidade para o padrão
+        game.Workspace.Gravity = 196.2
+        
+        -- Envia uma notificação ao jogador
+        notify("Resetado!", "Velocidade, altura do pulo e gravidade.")
     end
 })
 
@@ -230,54 +253,5 @@ Tabs.Settings:AddToggle("Anti Void", {
     Default = false,
     Callback = function(state)
         isAntiVoidActive = state
-    end
-})
-
--- Função para aplicar o boost de FPS
-local function applyFPSBoost()
-    settings().Rendering.QualityLevel = Enum.QualityLevel.Level01
-    game:GetService("Lighting").GlobalShadows = false
-
-    for _, v in pairs(game:GetService("Workspace"):GetDescendants()) do
-        if v:IsA("Part") or v:IsA("UnionOperation") or v:IsA("MeshPart") then
-            v.Material = Enum.Material.SmoothPlastic
-            v.Reflectance = 0
-        elseif v:IsA("Decal") or v:IsA("Texture") then
-            v:Destroy()
-        elseif v:IsA("ParticleEmitter") or v:IsA("Trail") then
-            v:Destroy()
-        elseif v:IsA("PointLight") or v:IsA("SpotLight") or v:IsA("SurfaceLight") then
-            v:Destroy()
-        end
-    end
-
-    game:GetService("Workspace").CurrentCamera.FieldOfView = 70
-    game:GetService("Workspace").CurrentCamera.MaxDistance = 500
-    notify("FPS Boost", "Ativado com sucesso!")
-end
-
--- Função para reverter as mudanças e voltar à qualidade normal
-local function revertFPSBoost()
-    settings().Rendering.QualityLevel = Enum.QualityLevel.Automatic
-    game:GetService("Lighting").GlobalShadows = true
-    notify("FPS Boost", "Desativado.")
-end
-
-local isFPSBoostActive = false  -- Inicia com o boost desativado
-
--- Função para alternar entre aplicar e reverter o boost de FPS
-local function toggleFPSBoost()
-    if isFPSBoostActive then
-        revertFPSBoost()
-    else
-        applyFPSBoost()
-    end
-    isFPSBoostActive = not isFPSBoostActive
-end
-
--- Aba: Configuração
-Tabs.Settings:AddButton({
-    Title = "Boost FPS",
-    Callback = function()
     end
 })
