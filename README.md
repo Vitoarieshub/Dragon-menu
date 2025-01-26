@@ -88,7 +88,7 @@ local function toggleNoclip(enable)
     end
 end
 
--- Funções da Aba: Main
+-- Aba: Início
 Tabs.Main:AddParagraph({ Title = "Programador Victor", Content = "Scripts personalizados" })
 
 Tabs.Main:AddButton({
@@ -155,7 +155,7 @@ Tabs.Main:AddSlider("WalkSpeed", {
     end
 })
 
--- Funções da Aba: Players
+-- Aba: Jogadores
 Tabs.Players:AddButton({
     Title = "ESP Nome",
     Callback = function()
@@ -163,84 +163,13 @@ Tabs.Players:AddButton({
     end
 })
 
--- Variáveis principais
-local RunService = game:GetService("RunService")
-local Players = game:GetService("Players")
-local LocalPlayer = Players.LocalPlayer
-local ESPEnabled = false
-local ESPConnections = {}
-
--- Função para desenhar as linhas ESP
-local function drawESP()
-    for _, player in pairs(Players:GetPlayers()) do
-        if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-            local character = player.Character
-            local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
-            local line = Drawing.new("Line")
-            
-            -- Configuração da linha
-            line.Visible = true
-            line.Color = Color3.new(1, 1, 1) -- Branco
-            line.Thickness = 2
-
-            -- Conexão para atualizar a posição da linha
-            local connection = RunService.RenderStepped:Connect(function()
-                if ESPEnabled and humanoidRootPart and character:FindFirstChild("Humanoid") and character.Humanoid.Health > 0 then
-                    local screenPos, onScreen = workspace.CurrentCamera:WorldToViewportPoint(humanoidRootPart.Position)
-                    if onScreen then
-                        line.From = Vector2.new(workspace.CurrentCamera.ViewportSize.X / 2, workspace.CurrentCamera.ViewportSize.Y) -- Base da tela (centro inferior)
-                        line.To = Vector2.new(screenPos.X, screenPos.Y)
-                        line.Visible = true
-                    else
-                        line.Visible = false
-                    end
-                else
-                    line.Visible = false
-                end
-            end)
-
-            -- Guardar a linha e conexão para futura limpeza
-            table.insert(ESPConnections, {line = line, connection = connection})
-        end
-    end
-end
-
--- Função para limpar as linhas ESP
-local function clearESP()
-    for _, espData in pairs(ESPConnections) do
-        if espData.line then
-            espData.line:Remove()
-        end
-        if espData.connection then
-            espData.connection:Disconnect()
-        end
-    end
-    ESPConnections = {}
-end
-
--- Função para ativar/desativar o ESP
-local function toggleESP(state)
-    ESPEnabled = state
-    if ESPEnabled then
-        clearESP() -- Limpa quaisquer linhas antigas antes de recriar
-        drawESP()
-        print("ESP Linhas ativado.")
-    else
-        clearESP()
-        print("ESP Linhas desativado.")
-    end
-end
-
-Tabs.Players:AddToggle("Esp", {
-    Title = "Esp linhas",
-    Description = "Ativa/desativa Esp",
-    Default = false,
-    Callback = function(state)
-        toggleESP(state) -- Chama a função de ativar/desativar ESP com base no estado do toggle
+Tabs.Players:AddButton({
+    Title = "ESP Linhas",
+    Callback = function()
+        loadstring(game:HttpGet("https://pastebin.com/raw/nnHbfvGW"))()
     end
 })
 
--- Função de Teleport
 Tabs.Players:AddParagraph({ Title = "Teleport", Content = "Funciona em todos os servidores" })
 
 Tabs.Players:AddButton({
@@ -250,7 +179,7 @@ Tabs.Players:AddButton({
     end
 })
 
--- Funções da Aba: Exploits
+-- Aba: Exploits
 Tabs.Exploits:AddButton({
     Title = "infiniteyield",
     Callback = function()
@@ -265,7 +194,7 @@ Tabs.Exploits:AddButton({
     end
 })
 
--- Funções da Aba: Configuração
+-- Aba: Configuração
 Tabs.Settings:AddButton({
     Title = "Anti Kick",
     Callback = function()
@@ -274,7 +203,6 @@ Tabs.Settings:AddButton({
     end
 })
 
--- Anti Void
 local safePosition = Vector3.new(0, 50, 0) -- Posição segura no mapa
 local voidLimit = -300
 local maxHeight = 300
@@ -302,5 +230,54 @@ Tabs.Settings:AddToggle("Anti Void", {
     Default = false,
     Callback = function(state)
         isAntiVoidActive = state
+    end
+})
+
+-- Função para aplicar o boost de FPS
+local function applyFPSBoost()
+    settings().Rendering.QualityLevel = Enum.QualityLevel.Level01
+    game:GetService("Lighting").GlobalShadows = false
+
+    for _, v in pairs(game:GetService("Workspace"):GetDescendants()) do
+        if v:IsA("Part") or v:IsA("UnionOperation") or v:IsA("MeshPart") then
+            v.Material = Enum.Material.SmoothPlastic
+            v.Reflectance = 0
+        elseif v:IsA("Decal") or v:IsA("Texture") then
+            v:Destroy()
+        elseif v:IsA("ParticleEmitter") or v:IsA("Trail") then
+            v:Destroy()
+        elseif v:IsA("PointLight") or v:IsA("SpotLight") or v:IsA("SurfaceLight") then
+            v:Destroy()
+        end
+    end
+
+    game:GetService("Workspace").CurrentCamera.FieldOfView = 70
+    game:GetService("Workspace").CurrentCamera.MaxDistance = 500
+    notify("FPS Boost", "Ativado com sucesso!")
+end
+
+-- Função para reverter as mudanças e voltar à qualidade normal
+local function revertFPSBoost()
+    settings().Rendering.QualityLevel = Enum.QualityLevel.Automatic
+    game:GetService("Lighting").GlobalShadows = true
+    notify("FPS Boost", "Desativado.")
+end
+
+local isFPSBoostActive = false  -- Inicia com o boost desativado
+
+-- Função para alternar entre aplicar e reverter o boost de FPS
+local function toggleFPSBoost()
+    if isFPSBoostActive then
+        revertFPSBoost()
+    else
+        applyFPSBoost()
+    end
+    isFPSBoostActive = not isFPSBoostActive
+end
+
+-- Aba: Configuração
+Tabs.Settings:AddButton({
+    Title = "Boost FPS",
+    Callback = function()
     end
 })
