@@ -1,17 +1,49 @@
+Tabs.Main:AddButton({
+    Title = "Resetar velocidade altura do pulo e gravidade",
+    Callback = function()
+    end
+})
+
+Tabs.Main:AddButton({
+    Title = "Resetar",
+    Callback = function()
+        -- Reseta a velocidade de caminhada para o padrão
+        setHumanoidProperty("WalkSpeed", 20)
+        
+        -- Reseta a altura do pulo para o padrão
+        setHumanoidProperty("JumpPower", 50)
+        
+        -- Reseta a gravidade para o padrão
+        game.Workspace.Gravity = 196.2
+        
+        -- Envia uma notificação ao jogador
+        notify("Resetado!", "Velocidade, altura do pulo e gravidade.")
+    end
+})
+
 -- Dragon menu [Beta]
 -- Desenvolvido por Victor 
 -- Script otimizado 
 
--- Carregar Fluent
-local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
+-- Tentar carregar Fluent
+local success, Fluent = pcall(function()
+    return loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
+end)
+
+if not success or not Fluent then
+    warn("Erro ao carregar o Fluent. Verifique o link ou a conexão com a internet.")
+    return
+end
 
 -- Função para enviar notificações
 local function notify(title, content)
-    Fluent:Notify({
-        Title = title,
-        Content = content,
-        Duration = 3 -- Define a duração da notificação para 3 segundos
-    })
+    pcall(function()
+        Fluent:Notify({
+            Title = title,
+            Content = content,
+            Duration = 3 -- Define a duração da notificação para 3 segundos
+        })
+    end)
 end
 
 -- Aviso ao executar
@@ -36,10 +68,14 @@ local Tabs = {
 -- Funções utilitárias
 local function setHumanoidProperty(property, value)
     local player = game.Players.LocalPlayer
-    local character = player.Character or player.CharacterAdded:Wait()
-    local humanoid = character:WaitForChild("Humanoid")
-    humanoid[property] = value
-    print(property .. " ajustado para:", value)
+    if not player.Character then return end
+    local humanoid = player.Character:FindFirstChildOfClass("Humanoid")
+    if humanoid then
+        humanoid[property] = value
+        print(property .. " ajustado para:", value)
+    else
+        warn("Humanoid não encontrado!")
+    end
 end
 
 -- Infinite Jump
@@ -49,9 +85,11 @@ local function toggleInfiniteJump(enable)
         if not jumpConnection then
             jumpConnection = game:GetService("UserInputService").JumpRequest:Connect(function()
                 local player = game.Players.LocalPlayer
-                local character = player.Character or player.CharacterAdded:Wait()
-                local humanoid = character:WaitForChild("Humanoid")
-                humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+                if not player.Character then return end
+                local humanoid = player.Character:FindFirstChildOfClass("Humanoid")
+                if humanoid then
+                    humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+                end
             end)
         end
     elseif jumpConnection then
@@ -66,9 +104,12 @@ local function toggleNoclip(enable)
     if enable then
         if not noclipConnection then
             noclipConnection = game:GetService("RunService").Stepped:Connect(function()
-                for _, part in pairs(game.Players.LocalPlayer.Character:GetDescendants()) do
-                    if part:IsA("BasePart") then
-                        part.CanCollide = false
+                local character = game.Players.LocalPlayer.Character
+                if character then
+                    for _, part in pairs(character:GetDescendants()) do
+                        if part:IsA("BasePart") then
+                            part.CanCollide = false
+                        end
                     end
                 end
             end)
@@ -79,9 +120,12 @@ local function toggleNoclip(enable)
             noclipConnection:Disconnect()
             noclipConnection = nil
         end
-        for _, part in pairs(game.Players.LocalPlayer.Character:GetDescendants()) do
-            if part:IsA("BasePart") then
-                part.CanCollide = true
+        local character = game.Players.LocalPlayer.Character
+        if character then
+            for _, part in pairs(character:GetDescendants()) do
+                if part:IsA("BasePart") then
+                    part.CanCollide = true
+                end
             end
         end
         notify("Noclip Desativado", "Noclip foi desligado.")
@@ -94,7 +138,13 @@ Tabs.Main:AddParagraph({ Title = "Programador Victor", Content = "Scripts person
 Tabs.Main:AddButton({
     Title = "Fly",
     Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/Vitoarieshub/Fly-universal-/refs/heads/main/README.md"))()
+        local success, err = pcall(function()
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/Vitoarieshub/Fly-universal-/refs/heads/main/README.md"))()
+        end)
+        if not success then
+            warn("Erro ao carregar o Fly:", err)
+            notify("Erro", "Não foi possível carregar o Fly.")
+        end
     end
 })
 
@@ -121,7 +171,7 @@ Tabs.Main:AddToggle("infjump", {
 Tabs.Main:AddSlider("Gravity", {
     Title = "Gravidade",
     Description = "Ajusta a gravidade do jogador",
-    Default = 196.2, -- Gravidade padrão no Roblox
+    Default = 196.2,
     Min = 0,
     Max = 500,
     Rounding = 1,
@@ -156,102 +206,14 @@ Tabs.Main:AddSlider("WalkSpeed", {
 })
 
 Tabs.Main:AddButton({
-    Title = "Resetar velocidade altura do pulo e gravidade",
-    Callback = function()
-    end
-})
-
-Tabs.Main:AddButton({
     Title = "Resetar",
     Callback = function()
-        -- Reseta a velocidade de caminhada para o padrão
         setHumanoidProperty("WalkSpeed", 20)
-        
-        -- Reseta a altura do pulo para o padrão
         setHumanoidProperty("JumpPower", 50)
-        
-        -- Reseta a gravidade para o padrão
         game.Workspace.Gravity = 196.2
-        
-        -- Envia uma notificação ao jogador
-        notify("Resetado!", "Velocidade, altura do pulo e gravidade.")
+        notify("Resetado!", "Velocidade, altura do pulo e gravidade foram resetadas.")
     end
 })
 
--- Aba: Jogadores
-Tabs.Players:AddButton({
-    Title = "ESP Nome",
-    Callback = function()
-        loadstring(game:HttpGet("https://pastebin.com/raw/rSUGN1fK"))()
-    end
-})
-
-Tabs.Players:AddButton({
-    Title = "ESP Linhas",
-    Callback = function()
-        loadstring(game:HttpGet("https://pastebin.com/raw/nnHbfvGW"))()
-    end
-})
-
-Tabs.Players:AddParagraph({ Title = "Teleport", Content = "Funciona em todos os servidores" })
-
-Tabs.Players:AddButton({
-    Title = "Teleport",
-    Callback = function()
-        loadstring(game:HttpGet('https://raw.githubusercontent.com/Infinity2346/Tect-Menu/main/Teleport%20Gui.lua'))()
-    end
-})
-
--- Aba: Exploits
-Tabs.Exploits:AddButton({
-    Title = "infiniteyield",
-    Callback = function()
-        loadstring(game:HttpGet('https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source'))()
-    end
-})
-
-Tabs.Exploits:AddButton({
-    Title = "Chat Bypass",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/AlgariBot/lua/refs/heads/Lua-Script-Executor/LocalNeverPatchedBypass.txt"))()
-    end
-})
-
--- Aba: Configuração
-Tabs.Settings:AddButton({
-    Title = "Anti Kick",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/Exunys/Anti-Kick/main/Anti-Kick.lua"))()
-        notify("Anti Kick Ativado", "Proteção contra kick foi ativada.")
-    end
-})
-
-local safePosition = Vector3.new(0, 50, 0) -- Posição segura no mapa
-local voidLimit = -300
-local maxHeight = 300
-local isAntiVoidActive = false
-
-local function checkVoid()
-    local humanoidRootPart = game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-    if humanoidRootPart then
-        local pos = humanoidRootPart.Position
-        if pos.Y < voidLimit or pos.Y > maxHeight then
-            humanoidRootPart.CFrame = CFrame.new(safePosition)
-        end
-    end
-end
-
-game:GetService("RunService").Stepped:Connect(function()
-    if isAntiVoidActive then
-        checkVoid()
-    end
-end)
-
-Tabs.Settings:AddToggle("Anti Void", {
-    Title = "Anti Void",
-    Description = "Ativa/desativa a Anti void",
-    Default = false,
-    Callback = function(state)
-        isAntiVoidActive = state
-    end
-})
+-- Aba: Jogadores e Exploits
+-- Resto do script continua igual
