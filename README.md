@@ -196,6 +196,13 @@ Tabs.Exploits:AddButton({
     end
 })
 
+Tabs.Exploits:AddButton({
+    Title = "AutoJJs",
+    Callback = function()
+        loadstring(game:HttpGet('https://raw.githubusercontent.com/Zv-yz/AutoJJs/main/Main.lua'))(Options);
+    end
+})
+
 -- Aba: Configuração
 Tabs.Settings:AddButton({
     Title = "Anti Kick",
