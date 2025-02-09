@@ -224,6 +224,48 @@ Tabs.Settings:AddButton({
     end
 })
 
+Tabs.Settings:AddButton({
+    Title = "FPS",
+    Callback = function()
+        local Players = game:GetService("Players")
+        local RunService = game:GetService("RunService")
+
+        local player = Players.LocalPlayer
+        local playerGui = player:FindFirstChild("PlayerGui") or player:WaitForChild("PlayerGui")
+
+        -- Criar ScreenGui
+        local screenGui = Instance.new("ScreenGui")
+        screenGui.Parent = playerGui
+
+        -- Criar FPS Counter
+        local fpsLabel = Instance.new("TextLabel")
+        fpsLabel.Size = UDim2.new(0, 80, 0, 30) 
+        fpsLabel.Position = UDim2.new(1, -90, 0, 10) 
+        fpsLabel.BackgroundTransparency = 0.3
+        fpsLabel.BackgroundColor3 = Color3.new(0, 0, 0)
+        fpsLabel.TextColor3 = Color3.new(1, 1, 1)
+        fpsLabel.TextScaled = true
+        fpsLabel.Font = Enum.Font.Code
+        fpsLabel.Text = "FPS: 0"
+        fpsLabel.Parent = screenGui
+
+        -- Variáveis para medir FPS
+        local lastTime = os.clock()
+        local frameCount = 0
+
+        RunService.RenderStepped:Connect(function()
+            frameCount = frameCount + 1
+            local currentTime = os.clock()
+            
+            if currentTime - lastTime >= 1 then
+                fpsLabel.Text = "FPS: " .. frameCount
+                frameCount = 0
+                lastTime = currentTime
+            end
+        end)
+    end
+})
+
 local safePosition = Vector3.new(0, 50, 0) -- Posição segura no mapa
 local voidLimit = -300
 local maxHeight = 300
