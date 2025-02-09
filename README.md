@@ -19,7 +19,7 @@ notify("Executado!", "Script executado com sucesso.")
 
 -- Criar a janela principal
 local Window = Fluent:CreateWindow({
-    Title = "Dragon menu [Beta] " .. Fluent.Version,
+    Title = "Dragon menu " .. Fluent.Version,
     TabWidth = 90,
     Size = UDim2.fromOffset(420, 310),
     Theme = "Dark"
@@ -155,7 +155,19 @@ Tabs.Main:AddSlider("WalkSpeed", {
     end
 })
 
-Tabs.Main:AddParagraph({ Title = "Quer fazer seu próprio script", Content = "Kwai:Vitoroficial Insta: vitoroemanuel"})
+Tabs.Main:AddSlider("FOV", {
+    Title = "FOV",
+    Description = "Ajusta o campo de visão da câmera",
+    Default = 70,
+    Min = 30,
+    Max = 120, -- Máximo permitido pelo Roblox
+    Rounding = 1,
+    Callback = function(value)
+        game.Workspace.CurrentCamera.FieldOfView = value
+    end
+})
+
+Tabs.Main:AddParagraph({ Title = "Quer fazer seu próprio script", Content = "Kwai:Vitoroficial Insta:vitoroemanuel"})
 
 -- Aba: Jogadores
 Tabs.Players:AddButton({
