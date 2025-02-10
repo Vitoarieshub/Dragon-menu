@@ -215,6 +215,13 @@ Tabs.Exploits:AddButton({
     end
 })
 
+Tabs.Exploits:AddButton({
+    Title = "Bring Parts",
+    Callback = function()
+        loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Bring-Parts-27586"))()
+    end
+})
+
 -- Aba: Configuração
 Tabs.Settings:AddButton({
     Title = "Anti Kick",
