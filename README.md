@@ -235,43 +235,60 @@ Tabs.Settings:AddButton({
     Title = "FPS",
     Callback = function()
         local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
+        local RunService = game:GetService("RunService")
 
-local player = Players.LocalPlayer
-local playerGui = player:FindFirstChild("PlayerGui") or player:WaitForChild("PlayerGui")
+        local player = Players.LocalPlayer
+        local playerGui = player:FindFirstChild("PlayerGui") or player:WaitForChild("PlayerGui")
 
--- Criar ScreenGui
-local screenGui = Instance.new("ScreenGui")
-screenGui.Parent = playerGui
+        -- Verifica se já existe um contador de FPS e remove para evitar duplicação
+        local existingGui = playerGui:FindFirstChild("FPSCounter")
+        if existingGui then
+            existingGui:Destroy()
+        end
 
--- Criar FPS Counter
-local fpsLabel = Instance.new("TextLabel")
-fpsLabel.Size = UDim2.new(0, 80, 0, 30) 
-fpsLabel.Position = UDim2.new(1, -90, 0, 10) 
-fpsLabel.BackgroundTransparency = 0.3
-fpsLabel.BackgroundColor3 = Color3.new(0, 0, 0)
-fpsLabel.TextColor3 = Color3.new(1, 1, 1)
-fpsLabel.TextScaled = true
-fpsLabel.Font = Enum.Font.Code
-fpsLabel.Text = "FPS: 0"
-fpsLabel.Parent = screenGui
-fpsLabel.Active = true -- Permite interações
-fpsLabel.Draggable = true -- Permite arrastar
+        -- Criar ScreenGui
+        local screenGui = Instance.new("ScreenGui")
+        screenGui.Name = "FPSCounter"
+        screenGui.Parent = playerGui
 
--- Variáveis para medir FPS
-local lastTime = os.clock()
-local frameCount = 0
+        -- Criar FPS Counter
+        local fpsLabel = Instance.new("TextLabel")
+        fpsLabel.Size = UDim2.new(0, 80, 0, 25) -- Reduzi o tamanho
+        fpsLabel.Position = UDim2.new(1, -90, 0, 10)
+        fpsLabel.BackgroundTransparency = 0.3
+        fpsLabel.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+        fpsLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+        fpsLabel.TextScaled = false
+        fpsLabel.TextSize = 14 -- Texto menor
+        fpsLabel.Font = Enum.Font.Code
+        fpsLabel.Text = "FPS: 0"
+        fpsLabel.Parent = screenGui
+        fpsLabel.Active = true -- Permite interações
+        fpsLabel.Draggable = true -- Permite arrastar
 
-RunService.RenderStepped:Connect(function()
-    frameCount = frameCount + 1
-    local currentTime = os.clock()
-    
-    if currentTime - lastTime >= 1 then
-        fpsLabel.Text = "FPS: " .. frameCount
-        frameCount = 0
-        lastTime = currentTime
+        -- Melhorando o estilo
+        fpsLabel.BorderSizePixel = 1 -- Borda mais fina
+        fpsLabel.BorderColor3 = Color3.new(1, 1, 1)
+        fpsLabel.TextStrokeTransparency = 0.6
+        fpsLabel.TextStrokeColor3 = Color3.new(0, 0, 0)
+
+        -- Variáveis para medir FPS
+        local lastTime = tick()
+        local frameCount = 0
+
+        -- Atualiza o contador de FPS
+        RunService.RenderStepped:Connect(function()
+            frameCount = frameCount + 1
+            local currentTime = tick()
+
+            if currentTime - lastTime >= 1 then
+                fpsLabel.Text = "FPS: " .. frameCount
+                frameCount = 0
+                lastTime = currentTime
+            end
+        end)
     end
-end)
+})
 
 local safePosition = Vector3.new(0, 50, 0) -- Posição segura no mapa
 local voidLimit = -300
