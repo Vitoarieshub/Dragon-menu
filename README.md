@@ -1,4 +1,4 @@
--- Dragon menu [Beta]
+-- Dragon menu 
 -- Desenvolvido por Victor 
 -- Script otimizado 
 
@@ -15,7 +15,7 @@ local function notify(title, content)
 end
 
 -- Aviso ao executar
-notify("Executado!", "Script executado com sucesso.")
+notify("Executado com Sucesso!", "Melhor script universal.")
 
 -- Criar a janela principal
 local Window = Fluent:CreateWindow({
@@ -84,7 +84,7 @@ local function toggleNoclip(enable)
                 part.CanCollide = true
             end
         end
-        notify("Noclip Desativado", "Noclip foi desligado.")
+        notify("Noclip", "Noclip foi Desativado.")
     end
 end
 
@@ -136,7 +136,7 @@ Tabs.Main:AddSlider("JumpPower", {
     Description = "Define a altura do pulo",
     Default = 50,
     Min = 0,
-    Max = 400,
+    Max = 900,
     Rounding = 1,
     Callback = function(value)
         setHumanoidProperty("JumpPower", value)
@@ -227,7 +227,7 @@ Tabs.Settings:AddButton({
     Title = "Anti Kick",
     Callback = function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/Exunys/Anti-Kick/main/Anti-Kick.lua"))()
-        notify("Anti Kick Ativado", "Proteção contra kick foi ativada.")
+        notify("Anti Kick", "Proteção contra kick foi ativada.")
     end
 })
 
@@ -235,43 +235,43 @@ Tabs.Settings:AddButton({
     Title = "FPS",
     Callback = function()
         local Players = game:GetService("Players")
-        local RunService = game:GetService("RunService")
+local RunService = game:GetService("RunService")
 
-        local player = Players.LocalPlayer
-        local playerGui = player:FindFirstChild("PlayerGui") or player:WaitForChild("PlayerGui")
+local player = Players.LocalPlayer
+local playerGui = player:FindFirstChild("PlayerGui") or player:WaitForChild("PlayerGui")
 
-        -- Criar ScreenGui
-        local screenGui = Instance.new("ScreenGui")
-        screenGui.Parent = playerGui
+-- Criar ScreenGui
+local screenGui = Instance.new("ScreenGui")
+screenGui.Parent = playerGui
 
-        -- Criar FPS Counter
-        local fpsLabel = Instance.new("TextLabel")
-        fpsLabel.Size = UDim2.new(0, 80, 0, 30) 
-        fpsLabel.Position = UDim2.new(1, -90, 0, 10) 
-        fpsLabel.BackgroundTransparency = 0.3
-        fpsLabel.BackgroundColor3 = Color3.new(0, 0, 0)
-        fpsLabel.TextColor3 = Color3.new(1, 1, 1)
-        fpsLabel.TextScaled = true
-        fpsLabel.Font = Enum.Font.Code
-        fpsLabel.Text = "FPS: 0"
-        fpsLabel.Parent = screenGui
+-- Criar FPS Counter
+local fpsLabel = Instance.new("TextLabel")
+fpsLabel.Size = UDim2.new(0, 80, 0, 30) 
+fpsLabel.Position = UDim2.new(1, -90, 0, 10) 
+fpsLabel.BackgroundTransparency = 0.3
+fpsLabel.BackgroundColor3 = Color3.new(0, 0, 0)
+fpsLabel.TextColor3 = Color3.new(1, 1, 1)
+fpsLabel.TextScaled = true
+fpsLabel.Font = Enum.Font.Code
+fpsLabel.Text = "FPS: 0"
+fpsLabel.Parent = screenGui
+fpsLabel.Active = true -- Permite interações
+fpsLabel.Draggable = true -- Permite arrastar
 
-        -- Variáveis para medir FPS
-        local lastTime = os.clock()
-        local frameCount = 0
+-- Variáveis para medir FPS
+local lastTime = os.clock()
+local frameCount = 0
 
-        RunService.RenderStepped:Connect(function()
-            frameCount = frameCount + 1
-            local currentTime = os.clock()
-            
-            if currentTime - lastTime >= 1 then
-                fpsLabel.Text = "FPS: " .. frameCount
-                frameCount = 0
-                lastTime = currentTime
-            end
-        end)
+RunService.RenderStepped:Connect(function()
+    frameCount = frameCount + 1
+    local currentTime = os.clock()
+    
+    if currentTime - lastTime >= 1 then
+        fpsLabel.Text = "FPS: " .. frameCount
+        frameCount = 0
+        lastTime = currentTime
     end
-})
+end)
 
 local safePosition = Vector3.new(0, 50, 0) -- Posição segura no mapa
 local voidLimit = -300
