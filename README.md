@@ -111,8 +111,8 @@ Tabs.Main:AddToggle("infjump", {
     Default = false,
     Callback = function(state)
         notify(
-            state and "Infinite Jump" or "Infinite Jump", 
-            state and "Pulo infinito Ativado com sucesso!" or "Pulo infinito Desativado."
+            state and "Infinite Jump Ativado" or "Infinite Jump Desativado", 
+            state and "Pulo infinito ativado com sucesso!" or "Pulo infinito desativado."
         )
         toggleInfiniteJump(state)
     end
@@ -167,7 +167,7 @@ Tabs.Main:AddSlider("FOV", {
     end
 })
 
-Tabs.Main:AddParagraph({ Title = "Quer fazer seu próprio script", Content = "Kwai:Vitoroficial Insta:vitoroemanuel"})
+Tabs.Main:AddParagraph({ Title = "Quer saber as atualizações", Content = "Kwai:Vitoroficial Insta:vitoroemanuel"})
 
 -- Aba: Jogadores
 Tabs.Players:AddButton({
@@ -193,6 +193,20 @@ Tabs.Players:AddButton({
     end
 })
 
+Tabs.Players:AddButton({
+    Title = "Emote",
+    Callback = function()
+        loadstring(game:HttpGet("https://pastebin.com/raw/eCpipCTH"))()
+    end
+})
+
+Tabs.Exploits:AddButton({
+    Title = "Fly car",
+    Callback = function()
+        loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Android-vfly-24974"))()
+    end
+})
+
 -- Aba: Exploits
 Tabs.Exploits:AddButton({
     Title = "infiniteyield",
@@ -202,9 +216,9 @@ Tabs.Exploits:AddButton({
 })
 
 Tabs.Exploits:AddButton({
-    Title = "Chat Bypass",
+    Title = "Chat Bypass (Teste)",
     Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/AlgariBot/lua/refs/heads/Lua-Script-Executor/LocalNeverPatchedBypass.txt"))()
+        loadstring(game:HttpGet("https://pastebin.com/raw/qJwH9964"))();
     end
 })
 
@@ -236,12 +250,11 @@ Tabs.Settings:AddButton({
     Callback = function()
         local Players = game:GetService("Players")
         local RunService = game:GetService("RunService")
-        local StarterGui = game:GetService("StarterGui")
 
         local player = Players.LocalPlayer
         local playerGui = player:FindFirstChild("PlayerGui") or player:WaitForChild("PlayerGui")
 
-        -- Evita duplicação removendo qualquer contador existente
+        -- Verifica se já existe um contador de FPS e remove para evitar duplicação
         local existingGui = playerGui:FindFirstChild("FPSCounter")
         if existingGui then
             existingGui:Destroy()
@@ -250,39 +263,35 @@ Tabs.Settings:AddButton({
         -- Criar ScreenGui
         local screenGui = Instance.new("ScreenGui")
         screenGui.Name = "FPSCounter"
-        screenGui.ResetOnSpawn = false -- Mantém a GUI após respawn
         screenGui.Parent = playerGui
 
         -- Criar FPS Counter
         local fpsLabel = Instance.new("TextLabel")
-        fpsLabel.Size = UDim2.new(0, 80, 0, 25)
+        fpsLabel.Size = UDim2.new(0, 80, 0, 25) -- Reduzi o tamanho
         fpsLabel.Position = UDim2.new(1, -90, 0, 10)
         fpsLabel.BackgroundTransparency = 0.3
         fpsLabel.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
         fpsLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
         fpsLabel.TextScaled = false
-        fpsLabel.TextSize = 14
+        fpsLabel.TextSize = 14 -- Texto menor
         fpsLabel.Font = Enum.Font.Code
         fpsLabel.Text = "FPS: 0"
         fpsLabel.Parent = screenGui
-        fpsLabel.Active = true
-        fpsLabel.Draggable = true
+        fpsLabel.Active = true -- Permite interações
+        fpsLabel.Draggable = true -- Permite arrastar
 
         -- Melhorando o estilo
-        fpsLabel.BorderSizePixel = 1
+        fpsLabel.BorderSizePixel = 1 -- Borda mais fina
         fpsLabel.BorderColor3 = Color3.new(1, 1, 1)
         fpsLabel.TextStrokeTransparency = 0.6
         fpsLabel.TextStrokeColor3 = Color3.new(0, 0, 0)
-
-        -- Salva no StarterGui para reaparecer após reset
-        StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.All, true)
 
         -- Variáveis para medir FPS
         local lastTime = tick()
         local frameCount = 0
 
         -- Atualiza o contador de FPS
-        local function updateFPS()
+        RunService.RenderStepped:Connect(function()
             frameCount = frameCount + 1
             local currentTime = tick()
 
@@ -290,17 +299,6 @@ Tabs.Settings:AddButton({
                 fpsLabel.Text = "FPS: " .. frameCount
                 frameCount = 0
                 lastTime = currentTime
-            end
-        end
-
-        -- Conexão persistente para atualizar FPS
-        RunService.RenderStepped:Connect(updateFPS)
-
-        -- Recria o contador após respawn
-        player.CharacterAdded:Connect(function()
-            task.wait(1) -- Pequeno delay para garantir que a GUI carregue
-            if not playerGui:FindFirstChild("FPSCounter") then
-                screenGui.Parent = playerGui
             end
         end)
     end
@@ -329,7 +327,7 @@ end)
 
 Tabs.Settings:AddToggle("Anti Void", {
     Title = "Anti Void",
-    Description = "Ativa/desativa a Anti void",
+    Description = "Ativa/desativa Anti void",
     Default = false,
     Callback = function(state)
         isAntiVoidActive = state
