@@ -194,6 +194,22 @@ Tabs.Players:AddButton({
 })
 
 Tabs.Players:AddButton({
+    Title = "Click TP",
+    Callback = function()
+        mouse = game.Players.LocalPlayer:GetMouse()
+tool = Instance.new("Tool")
+tool.RequiresHandle = false
+tool.Name = "Equip to Click TP"
+tool.Activated:connect(function()
+local pos = mouse.Hit+Vector3.new(0,2.5,0)
+pos = CFrame.new(pos.X,pos.Y,pos.Z)
+game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = pos
+end)
+tool.Parent = game.Players.LocalPlayer.Backpack
+    end
+})
+
+Tabs.Players:AddButton({
     Title = "Emote",
     Callback = function()
         loadstring(game:HttpGet("https://pastebin.com/raw/eCpipCTH"))()
@@ -233,6 +249,13 @@ Tabs.Exploits:AddButton({
     Title = "Bring Parts",
     Callback = function()
         loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Bring-Parts-27586"))()
+    end
+})
+
+Tabs.Exploits:AddButton({
+    Title = "Invisible",
+    Callback = function()
+        loadstring(game:HttpGet('https://pastebin.com/raw/3Rnd9rHf'))()
     end
 })
 
@@ -343,7 +366,7 @@ Tabs.Settings:AddToggle("Anti Void", {
 })
 
 Tabs.Settings:AddButton({
-    Title = "FPS Boost",
+    Title = "FPS Boost (teste)",
     Callback = function()
         -- Otimiza todas as partes para reduzir o impacto gráfico
         for _, v in ipairs(workspace:GetDescendants()) do
@@ -359,17 +382,23 @@ Tabs.Settings:AddButton({
         end
 
         -- Ajusta configurações para melhorar o FPS
-        settings().Rendering.QualityLevel = Enum.QualityLevel.Level01 -- Reduz a qualidade gráfica
-        workspace.GlobalShadows = false -- Remove sombras globais
-        game.Lighting.FogEnd = 9e9 -- Remove neblina
-        game.Lighting.GlobalShadows = false -- Desativa sombras globais
-        game.Lighting.Brightness = 2 -- Ajusta o brilho para compensar a remoção de sombras
+        pcall(function()
+            settings().Rendering.QualityLevel = Enum.QualityLevel.Level01 -- Reduz a qualidade gráfica
+            workspace.GlobalShadows = false -- Remove sombras globais
+            
+            if game:FindFirstChild("Lighting") then
+                local lighting = game.Lighting
+                lighting.FogEnd = 9e9 -- Remove neblina
+                lighting.GlobalShadows = false -- Desativa sombras globais
+                lighting.Brightness = 2 -- Ajusta o brilho para compensar a remoção de sombras
+            end
+        end)
 
         -- Notificação de sucesso (se houver sistema de notificação)
         if Fluent then
             Fluent:Notify({
                 Title = "FPS Boost",
-                Content = "Otimização aplicada! O FPS foi melhorado.",
+                Content = "Otimização aplicado!",
                 Duration = 3
             })
         end
