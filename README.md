@@ -216,7 +216,7 @@ Tabs.Exploits:AddButton({
 })
 
 Tabs.Exploits:AddButton({
-    Title = "Chat Bypass (Teste)",
+    Title = "Chat Bypass",
     Callback = function()
         loadstring(game:HttpGet("https://pastebin.com/raw/qJwH9964"))();
     end
@@ -250,56 +250,64 @@ Tabs.Settings:AddButton({
     Callback = function()
         local Players = game:GetService("Players")
         local RunService = game:GetService("RunService")
-
         local player = Players.LocalPlayer
-        local playerGui = player:FindFirstChild("PlayerGui") or player:WaitForChild("PlayerGui")
 
-        -- Verifica se já existe um contador de FPS e remove para evitar duplicação
-        local existingGui = playerGui:FindFirstChild("FPSCounter")
-        if existingGui then
-            existingGui:Destroy()
+        local function createFPSCounter()
+            local playerGui = player:FindFirstChild("PlayerGui") or player:WaitForChild("PlayerGui")
+
+            -- Remover contador existente para evitar duplicações
+            local existingGui = playerGui:FindFirstChild("FPSCounter")
+            if existingGui then
+                existingGui:Destroy()
+            end
+
+            -- Criar novo ScreenGui
+            local screenGui = Instance.new("ScreenGui")
+            screenGui.Name = "FPSCounter"
+            screenGui.Parent = playerGui
+
+            -- Criar FPS Label
+            local fpsLabel = Instance.new("TextLabel")
+            fpsLabel.Size = UDim2.new(0, 80, 0, 25)
+            fpsLabel.Position = UDim2.new(1, -90, 0, 10)
+            fpsLabel.BackgroundTransparency = 0.3
+            fpsLabel.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+            fpsLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+            fpsLabel.TextScaled = false
+            fpsLabel.TextSize = 14
+            fpsLabel.Font = Enum.Font.Code
+            fpsLabel.Text = "FPS: 0"
+            fpsLabel.Parent = screenGui
+            fpsLabel.Active = true
+            fpsLabel.Draggable = true
+            fpsLabel.BorderSizePixel = 1
+            fpsLabel.BorderColor3 = Color3.new(1, 1, 1)
+            fpsLabel.TextStrokeTransparency = 0.6
+            fpsLabel.TextStrokeColor3 = Color3.new(0, 0, 0)
+
+            -- Variáveis para FPS
+            local lastTime = tick()
+            local frameCount = 0
+
+            -- Atualiza o FPS a cada segundo
+            RunService.RenderStepped:Connect(function()
+                frameCount = frameCount + 1
+                local currentTime = tick()
+                if currentTime - lastTime >= 1 then
+                    fpsLabel.Text = "FPS: " .. frameCount
+                    frameCount = 0
+                    lastTime = currentTime
+                end
+            end)
         end
 
-        -- Criar ScreenGui
-        local screenGui = Instance.new("ScreenGui")
-        screenGui.Name = "FPSCounter"
-        screenGui.Parent = playerGui
+        -- Criar o contador de FPS inicialmente
+        createFPSCounter()
 
-        -- Criar FPS Counter
-        local fpsLabel = Instance.new("TextLabel")
-        fpsLabel.Size = UDim2.new(0, 80, 0, 25) -- Reduzi o tamanho
-        fpsLabel.Position = UDim2.new(1, -90, 0, 10)
-        fpsLabel.BackgroundTransparency = 0.3
-        fpsLabel.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-        fpsLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-        fpsLabel.TextScaled = false
-        fpsLabel.TextSize = 14 -- Texto menor
-        fpsLabel.Font = Enum.Font.Code
-        fpsLabel.Text = "FPS: 0"
-        fpsLabel.Parent = screenGui
-        fpsLabel.Active = true -- Permite interações
-        fpsLabel.Draggable = true -- Permite arrastar
-
-        -- Melhorando o estilo
-        fpsLabel.BorderSizePixel = 1 -- Borda mais fina
-        fpsLabel.BorderColor3 = Color3.new(1, 1, 1)
-        fpsLabel.TextStrokeTransparency = 0.6
-        fpsLabel.TextStrokeColor3 = Color3.new(0, 0, 0)
-
-        -- Variáveis para medir FPS
-        local lastTime = tick()
-        local frameCount = 0
-
-        -- Atualiza o contador de FPS
-        RunService.RenderStepped:Connect(function()
-            frameCount = frameCount + 1
-            local currentTime = tick()
-
-            if currentTime - lastTime >= 1 then
-                fpsLabel.Text = "FPS: " .. frameCount
-                frameCount = 0
-                lastTime = currentTime
-            end
+        -- Criar novamente após respawn
+        player.CharacterAdded:Connect(function()
+            wait(1) -- Pequeno delay para evitar problemas de carregamento
+            createFPSCounter()
         end)
     end
 })
@@ -331,5 +339,39 @@ Tabs.Settings:AddToggle("Anti Void", {
     Default = false,
     Callback = function(state)
         isAntiVoidActive = state
+    end
+})
+
+Tabs.Settings:AddButton({
+    Title = "FPS Boost",
+    Callback = function()
+        -- Otimiza todas as partes para reduzir o impacto gráfico
+        for _, v in ipairs(workspace:GetDescendants()) do
+            if v:IsA("Part") or v:IsA("MeshPart") or v:IsA("UnionOperation") then
+                v.Material = Enum.Material.SmoothPlastic -- Remove texturas complexas
+                v.Reflectance = 0 -- Remove reflexos
+                v.CastShadow = false -- Desativa sombras
+            elseif v:IsA("Decal") or v:IsA("Texture") then
+                v.Transparency = 1 -- Oculta texturas e decals
+            elseif v:IsA("ParticleEmitter") or v:IsA("Trail") or v:IsA("Smoke") or v:IsA("Fire") or v:IsA("Explosion") then
+                v:Destroy() -- Remove efeitos que consomem desempenho
+            end
+        end
+
+        -- Ajusta configurações para melhorar o FPS
+        settings().Rendering.QualityLevel = Enum.QualityLevel.Level01 -- Reduz a qualidade gráfica
+        workspace.GlobalShadows = false -- Remove sombras globais
+        game.Lighting.FogEnd = 9e9 -- Remove neblina
+        game.Lighting.GlobalShadows = false -- Desativa sombras globais
+        game.Lighting.Brightness = 2 -- Ajusta o brilho para compensar a remoção de sombras
+
+        -- Notificação de sucesso (se houver sistema de notificação)
+        if Fluent then
+            Fluent:Notify({
+                Title = "FPS Boost",
+                Content = "Otimização aplicada! O FPS foi melhorado.",
+                Duration = 3
+            })
+        end
     end
 })
