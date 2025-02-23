@@ -27,8 +27,8 @@ local Window = Fluent:CreateWindow({
 
 -- Tabela de abas
 local Tabs = {
-    Main = Window:AddTab({ Title = "Main" }),
-    Players = Window:AddTab({ Title = "Players" }),
+    Main = Window:AddTab({ Title = "Ínício" }),
+    Players = Window:AddTab({ Title = "Jogador" }),
     Exploits = Window:AddTab({ Title = "Exploits" }),
     Settings = Window:AddTab({ Title = "Config" })
 }
@@ -99,14 +99,14 @@ Tabs.Main:AddButton({
 })
 
 Tabs.Main:AddToggle("noclip", {
-    Title = "Noclip",
+    Title = "Travessa Paredes",
     Description = "Ativa/desativa a travessia de paredes",
     Default = false,
     Callback = toggleNoclip
 })
 
 Tabs.Main:AddToggle("infjump", {
-    Title = "Infinite Jump",
+    Title = "Pulo infinito",
     Description = "Ativa/desativa o pulo infinito",
     Default = false,
     Callback = function(state)
@@ -132,7 +132,7 @@ Tabs.Main:AddSlider("Gravity", {
 })
 
 Tabs.Main:AddSlider("JumpPower", {
-    Title = "JumpPower",
+    Title = "Altura do pulo",
     Description = "Define a altura do pulo",
     Default = 50,
     Min = 0,
@@ -144,7 +144,7 @@ Tabs.Main:AddSlider("JumpPower", {
 })
 
 Tabs.Main:AddSlider("WalkSpeed", {
-    Title = "WalkSpeed",
+    Title = "Velocidade",
     Description = "Define a velocidade do jogador",
     Default = 20,
     Min = 0,
@@ -156,7 +156,7 @@ Tabs.Main:AddSlider("WalkSpeed", {
 })
 
 Tabs.Main:AddSlider("FOV", {
-    Title = "FOV",
+    Title = "Campo de visão",
     Description = "Ajusta o campo de visão da câmera",
     Default = 70,
     Min = 30,
@@ -184,12 +184,21 @@ Tabs.Players:AddButton({
     end
 })
 
-Tabs.Players:AddParagraph({ Title = "Teleport", Content = "Funciona em todos os servidores" })
+Tabs.Players:AddParagraph({ Title = "Teleporte", Content = "Funciona em todos os servidores" })
 
 Tabs.Players:AddButton({
-    Title = "Teleport",
+    Title = "Teleporte",
     Callback = function()
         loadstring(game:HttpGet('https://raw.githubusercontent.com/Infinity2346/Tect-Menu/main/Teleport%20Gui.lua'))()
+    end
+})
+
+Tabs.Players:AddParagraph({ Title = "Assistir Jogador", Content = "Funciona em todos os servidores" })
+
+Tabs.Players:AddButton({
+    Title = "Assistir jogador",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/Vitoarieshub/assistir-jogador-/refs/heads/main/README.md"))()
     end
 })
 
@@ -335,38 +344,8 @@ Tabs.Settings:AddButton({
     end
 })
 
-local safePosition = Vector3.new(0, 50, 0) -- Posição segura no mapa
-local voidLimit = -300
-local maxHeight = 300
-local isAntiVoidActive = false
-
-local function checkVoid()
-    local humanoidRootPart = game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-    if humanoidRootPart then
-        local pos = humanoidRootPart.Position
-        if pos.Y < voidLimit or pos.Y > maxHeight then
-            humanoidRootPart.CFrame = CFrame.new(safePosition)
-        end
-    end
-end
-
-game:GetService("RunService").Stepped:Connect(function()
-    if isAntiVoidActive then
-        checkVoid()
-    end
-end)
-
-Tabs.Settings:AddToggle("Anti Void", {
-    Title = "Anti Void",
-    Description = "Ativa/desativa Anti void",
-    Default = false,
-    Callback = function(state)
-        isAntiVoidActive = state
-    end
-})
-
 Tabs.Settings:AddButton({
-    Title = "FPS Boost (teste)",
+    Title = "FPS Boost",
     Callback = function()
         -- Otimiza todas as partes para reduzir o impacto gráfico
         for _, v in ipairs(workspace:GetDescendants()) do
@@ -398,9 +377,39 @@ Tabs.Settings:AddButton({
         if Fluent then
             Fluent:Notify({
                 Title = "FPS Boost",
-                Content = "Otimização aplicado!",
+                Content = "Otimização aplicada!",
                 Duration = 3
             })
         end
+    end
+})
+
+local safePosition = Vector3.new(0, 50, 0) -- Posição segura no mapa
+local voidLimit = -300
+local maxHeight = 300
+local isAntiVoidActive = false
+
+local function checkVoid()
+    local humanoidRootPart = game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+    if humanoidRootPart then
+        local pos = humanoidRootPart.Position
+        if pos.Y < voidLimit or pos.Y > maxHeight then
+            humanoidRootPart.CFrame = CFrame.new(safePosition)
+        end
+    end
+end
+
+game:GetService("RunService").Stepped:Connect(function()
+    if isAntiVoidActive then
+        checkVoid()
+    end
+end)
+
+Tabs.Settings:AddToggle("Anti Void", {
+    Title = "Anti Void",
+    Description = "Ativa/desativa Anti void",
+    Default = false,
+    Callback = function(state)
+        isAntiVoidActive = state
     end
 })
