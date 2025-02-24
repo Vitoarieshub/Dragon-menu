@@ -189,7 +189,136 @@ Tabs.Players:AddParagraph({ Title = "Teleporte", Content = "Funciona em todos os
 Tabs.Players:AddButton({
     Title = "Teleporte",
     Callback = function()
-        loadstring(game:HttpGet("https://github.com/Vitoarieshub/Teleporte-menu-/blob/main/README.md"))()
+        local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+
+-- Criar ScreenGui
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
+ScreenGui.ResetOnSpawn = false -- Faz com que a GUI não desapareça ao morrer
+
+-- Criar Frame principal
+local Frame = Instance.new("Frame")
+Frame.Size = UDim2.new(0, 200, 0, 150)
+Frame.Position = UDim2.new(0.5, -100, 0.5, -75)
+Frame.BackgroundColor3 = Color3.new(0.1, 0.1, 0.1)
+Frame.BorderSizePixel = 2
+Frame.Active = true
+Frame.Draggable = true
+Frame.Visible = false
+Frame.Parent = ScreenGui
+
+-- Criar título
+local Title = Instance.new("TextLabel")
+Title.Text = "Teleporte"
+Title.Size = UDim2.new(1, 0, 0, 20)
+Title.Position = UDim2.new(0, 0, 0, 0)
+Title.BackgroundColor3 = Color3.new(0.2, 0.2, 0.2)
+Title.TextColor3 = Color3.new(1, 1, 1)
+Title.Font = Enum.Font.SourceSansBold
+Title.TextSize = 19
+Title.Parent = Frame
+
+-- Criar Dropdown (Lista de Jogadores)
+local PlayerList = Instance.new("TextButton")
+PlayerList.Text = "Selecionar Jogador"
+PlayerList.Size = UDim2.new(1, -20, 0, 30)
+PlayerList.Position = UDim2.new(0, 10, 0, 40)
+PlayerList.BackgroundColor3 = Color3.new(0.3, 0.3, 0.3)
+PlayerList.TextColor3 = Color3.new(1, 1, 1)
+PlayerList.Font = Enum.Font.SourceSans
+PlayerList.TextSize = 16
+PlayerList.Parent = Frame
+
+-- Criar ScrollingFrame para a lista de jogadores
+local DropDown = Instance.new("ScrollingFrame")
+DropDown.Size = UDim2.new(0, 150, 0, 100)
+DropDown.Position = UDim2.new(1, 10, 0, 40) -- Posicionado ao lado direito
+DropDown.BackgroundColor3 = Color3.new(0.2, 0.2, 0.2)
+DropDown.BorderSizePixel = 2
+DropDown.ScrollingEnabled = true
+DropDown.CanvasSize = UDim2.new(0, 0, 0, 0)
+DropDown.Visible = false
+DropDown.Parent = Frame
+
+local PlayerButtons = {}
+
+-- Atualizar lista de jogadores online
+local function UpdatePlayerList()
+    for _, button in pairs(PlayerButtons) do
+        button:Destroy()
+    end
+    PlayerButtons = {}
+
+    local yOffset = 0
+    for _, player in pairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer then
+            local Button = Instance.new("TextButton")
+            Button.Text = player.Name
+            Button.Size = UDim2.new(1, 0, 0, 25)
+            Button.Position = UDim2.new(0, 0, 0, yOffset)
+            Button.BackgroundColor3 = Color3.new(0.4, 0.4, 0.4)
+            Button.TextColor3 = Color3.new(1, 1, 1)
+            Button.Font = Enum.Font.SourceSans
+            Button.TextSize = 14
+            Button.Parent = DropDown
+            Button.MouseButton1Click:Connect(function()
+                PlayerList.Text = player.Name
+                DropDown.Visible = false
+            end)
+            table.insert(PlayerButtons, Button)
+            yOffset = yOffset + 25
+        end
+    end
+    DropDown.CanvasSize = UDim2.new(0, 0, 0, yOffset)
+end
+
+PlayerList.MouseButton1Click:Connect(function()
+    DropDown.Visible = not DropDown.Visible
+    UpdatePlayerList()
+end)
+
+Players.PlayerAdded:Connect(UpdatePlayerList)
+Players.PlayerRemoving:Connect(UpdatePlayerList)
+
+-- Criar botão de teleporte
+local TeleportButton = Instance.new("TextButton")
+TeleportButton.Text = "Teleporta"
+TeleportButton.Size = UDim2.new(1, -20, 0, 30)
+TeleportButton.Position = UDim2.new(0, 10, 0, 80)
+TeleportButton.BackgroundColor3 = Color3.new(0, 0.5, 0)
+TeleportButton.TextColor3 = Color3.new(1, 1, 1)
+TeleportButton.Font = Enum.Font.SourceSansBold
+TeleportButton.TextSize = 16
+TeleportButton.Parent = Frame
+
+TeleportButton.MouseButton1Click:Connect(function()
+    local TargetPlayerName = PlayerList.Text
+    if TargetPlayerName == "Selecionar Jogador" then return end
+    
+    local TargetPlayer = Players:FindFirstChild(TargetPlayerName)
+    if TargetPlayer and TargetPlayer.Character and TargetPlayer.Character:FindFirstChild("HumanoidRootPart") then
+        LocalPlayer.Character:SetPrimaryPartCFrame(TargetPlayer.Character.HumanoidRootPart.CFrame + Vector3.new(0, 2, 0))
+    end
+end)
+
+-- Criar botão para abrir/fechar a GUI
+local ToggleButton = Instance.new("TextButton")
+ToggleButton.Text = "T"
+ToggleButton.Size = UDim2.new(0, 40, 0, 40)
+ToggleButton.Position = UDim2.new(0, 10, 1, -50)
+ToggleButton.BackgroundColor3 = Color3.new(0.2, 0.2, 0.2)
+ToggleButton.TextColor3 = Color3.new(1, 1, 1)
+ToggleButton.Font = Enum.Font.SourceSansBold
+ToggleButton.TextSize = 23
+ToggleButton.Parent = ScreenGui
+ToggleButton.Active = true
+ToggleButton.Draggable = true
+
+ToggleButton.MouseButton1Click:Connect(function()
+    Frame.Visible = not Frame.Visible
+end)
+
     end
 })
 
