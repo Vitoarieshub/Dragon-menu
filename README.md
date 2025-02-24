@@ -73,7 +73,7 @@ local function toggleNoclip(enable)
                 end
             end)
         end
-        notify("Noclip Ativado", "Você pode atravessar paredes agora!")
+        notify("Travessa Paredes", "Você pode travessar paredes agora!")
     else
         if noclipConnection then
             noclipConnection:Disconnect()
@@ -84,7 +84,7 @@ local function toggleNoclip(enable)
                 part.CanCollide = true
             end
         end
-        notify("Noclip", "Noclip foi Desativado.")
+        notify("Travessa Paredes", "Foi Desativado.")
     end
 end
 
@@ -111,7 +111,7 @@ Tabs.Main:AddToggle("infjump", {
     Default = false,
     Callback = function(state)
         notify(
-            state and "Infinite Jump Ativado" or "Infinite Jump Desativado", 
+            state and "Pulo infinito" or "Pulo infinito", 
             state and "Pulo infinito ativado com sucesso!" or "Pulo infinito desativado."
         )
         toggleInfiniteJump(state)
@@ -189,7 +189,7 @@ Tabs.Players:AddParagraph({ Title = "Teleporte", Content = "Funciona em todos os
 Tabs.Players:AddButton({
     Title = "Teleporte",
     Callback = function()
-        loadstring(game:HttpGet('https://raw.githubusercontent.com/Infinity2346/Tect-Menu/main/Teleport%20Gui.lua'))()
+        loadstring(game:HttpGet("https://github.com/Vitoarieshub/Teleporte-menu-/blob/main/README.md"))()
     end
 })
 
@@ -262,7 +262,7 @@ Tabs.Exploits:AddButton({
 })
 
 Tabs.Exploits:AddButton({
-    Title = "Invisible",
+    Title = "Invisível",
     Callback = function()
         loadstring(game:HttpGet('https://pastebin.com/raw/3Rnd9rHf'))()
     end
