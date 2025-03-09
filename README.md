@@ -1,3 +1,7 @@
+-- Dragon menu 
+-- Desenvolvido por Victor 
+-- Script otimizado 
+
 -- Carregar Fluent
 local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
 
@@ -11,11 +15,11 @@ local function notify(title, content)
 end
 
 -- Aviso ao executar
-notify("Executado com Sucesso!", "Seja bem vindo.")
+notify("Executado com Sucesso!", "Melhor script universal.")
 
 -- Criar a janela principal
 local Window = Fluent:CreateWindow({
-    Title = "Dragon legit " .. Fluent.Version,
+    Title = "Dragon menu " .. Fluent.Version,
     TabWidth = 90,
     Size = UDim2.fromOffset(420, 310),
     Theme = "Dark"
@@ -24,8 +28,8 @@ local Window = Fluent:CreateWindow({
 -- Tabela de abas
 local Tabs = {
     Main = Window:AddTab({ Title = "Ínício" }),
-    Visual = Window:AddTab({ Title = "Visual" }),
-    Players = Window:AddTab({ Title = "Jogadores" }),
+    Players = Window:AddTab({ Title = "Jogador" }),
+    Exploits = Window:AddTab({ Title = "Exploits" }),
     Settings = Window:AddTab({ Title = "Configuração" })
 }
 
@@ -138,24 +142,20 @@ Tabs.Main:AddSlider("WalkSpeed", {
     end
 })
 
-Tabs.Main:AddParagraph({ Title = "Segue nas redes sociais", Content = "Kwai:Vitoroficial Insta:vitoroemanuel"})
-
--- Aba: Visual
-Tabs.Visual:AddButton({
-    Title = "ESP Nome",
-    Callback = function()
-        loadstring(game:HttpGet("https://pastebin.com/raw/rSUGN1fK"))()
+Tabs.Main:AddSlider("Gravity", {
+    Title = "Gravidade",
+    Description = "Ajusta a gravidade do jogador",
+    Default = 196.2, -- Gravidade padrão no Roblox
+    Min = 0,
+    Max = 500,
+    Rounding = 1,
+    Callback = function(value)
+        game.Workspace.Gravity = value
+        notify("Gravidade", "Foi ajustada para: " .. value)
     end
 })
 
-Tabs.Visual:AddButton({
-    Title = "ESP Linhas",
-    Callback = function()
-        loadstring(game:HttpGet("https://pastebin.com/raw/nnHbfvGW"))()
-    end
-})
-
-Tabs.Visual:AddSlider("FOV", {
+Tabs.Main:AddSlider("FOV", {
     Title = "Campo de visão",
     Description = "Ajusta o campo de visão da câmera",
     Default = 70,
@@ -167,78 +167,24 @@ Tabs.Visual:AddSlider("FOV", {
     end
 })
 
-Tabs.Visual:AddToggle("esp_nome", {
+Tabs.Main:AddParagraph({ Title = "Quer saber as atualizações", Content = "Kwai:Vitoroficial Insta:vitoroemanuel"})
+
+-- Aba: Jogadores
+Tabs.Players:AddButton({
     Title = "ESP Nome",
-    Description = "Ativa/Desativa o ESP de nome",
-    Default = false,
-    Callback = function(state)
-        local Players = game:GetService("Players")
-        local RunService = game:GetService("RunService")
-        local LocalPlayer = Players.LocalPlayer
-
-        -- Função para criar ESP
-        local function criarESP(player)
-            if player == LocalPlayer then return end
-
-            local char = player.Character or player.CharacterAdded:Wait()
-            local head = char:WaitForChild("Head", 5)
-            if head and not head:FindFirstChild("ESP") then
-                local esp = Instance.new("BillboardGui")
-                esp.Name = "ESP"
-                esp.Adornee = head
-                esp.Size = UDim2.new(0, 100, 0, 50)
-                esp.StudsOffset = Vector3.new(0, 2, 0)
-                esp.AlwaysOnTop = true
-
-                local text = Instance.new("TextLabel")
-                text.Size = UDim2.new(1, 0, 1, 0)
-                text.BackgroundTransparency = 1
-                text.Text = player.Name
-                text.TextColor3 = Color3.fromRGB(255, 0, 0)
-                text.TextScaled = true
-                text.Font = Enum.Font.GothamBold
-                text.TextStrokeTransparency = 0.4
-                text.TextStrokeColor3 = Color3.new(0, 0, 0)
-                text.Parent = esp
-
-                esp.Parent = head
-            end
-        end
-
-        -- Ativa ou Desativa ESP
-        if state then
-            for _, player in ipairs(Players:GetPlayers()) do
-                criarESP(player)
-            end
-
-            Players.PlayerAdded:Connect(function(player)
-                player.CharacterAdded:Connect(function()
-                    wait(1)
-                    criarESP(player)
-                end)
-            end)
-
-            Players.PlayerRemoving:Connect(function(player)
-                if player.Character then
-                    local esp = player.Character:FindFirstChild("ESP", true)
-                    if esp then
-                        esp:Destroy()
-                    end
-                end
-            end)
-        else
-            for _, player in ipairs(Players:GetPlayers()) do
-                if player.Character then
-                    local esp = player.Character:FindFirstChild("ESP", true)
-                    if esp then
-                        esp:Destroy()
-                    end
-                end
-            end
-        end
+    Callback = function()
+        loadstring(game:HttpGet("https://pastebin.com/raw/rSUGN1fK"))()
     end
 })
 
+Tabs.Players:AddButton({
+    Title = "ESP Linhas",
+    Callback = function()
+        loadstring(game:HttpGet("https://pastebin.com/raw/nnHbfvGW"))()
+    end
+})
+
+Tabs.Players:AddParagraph({ Title = "Teleporte", Content = "Funciona em todos os servidores" })
 
 Tabs.Players:AddButton({
     Title = "Teleporte",
@@ -392,11 +338,155 @@ ToggleButton.MouseButton1Click:Connect(function()
 end)
     end
 })
+        
+Tabs.Players:AddParagraph({ Title = "Assistir Jogador", Content = "Funciona em todos os servidores" })
 
 Tabs.Players:AddButton({
     Title = "Assistir jogador",
     Callback = function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/Vitoarieshub/assistir-jogador-/refs/heads/main/README.md"))()
+    end
+})
+
+Tabs.Players:AddButton({
+    Title = "Click TP",
+    Callback = function()
+        mouse = game.Players.LocalPlayer:GetMouse()
+tool = Instance.new("Tool")
+tool.RequiresHandle = false
+tool.Name = "Equip to Click TP"
+tool.Activated:connect(function()
+local pos = mouse.Hit+Vector3.new(0,2.5,0)
+pos = CFrame.new(pos.X,pos.Y,pos.Z)
+game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = pos
+end)
+tool.Parent = game.Players.LocalPlayer.Backpack
+    end
+})
+
+Tabs.Players:AddButton({
+    Title = "Emote",
+    Callback = function()
+        loadstring(game:HttpGet("https://pastebin.com/raw/eCpipCTH"))()
+    end
+})
+
+Tabs.Exploits:AddButton({
+    Title = "Fly car",
+    Callback = function()
+        loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Android-vfly-24974"))()
+    end
+})
+
+-- Aba: Exploits
+Tabs.Exploits:AddButton({
+    Title = Infiniteyield",
+    Callback = function()
+        loadstring(game:HttpGet('https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source'))()
+    end
+})
+
+Tabs.Exploits:AddButton({
+    Title = "Chat Bypass",
+    Callback = function()
+        loadstring(game:HttpGet("https://pastebin.com/raw/qJwH9964"))();
+    end
+})
+
+Tabs.Exploits:AddButton({
+    Title = "AutoJJs",
+    Callback = function()
+        loadstring(game:HttpGet('https://raw.githubusercontent.com/Zv-yz/AutoJJs/main/Main.lua'))(Options);
+    end
+})
+
+Tabs.Exploits:AddButton({
+    Title = "Grudar portas",
+    Callback = function()
+        loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Bring-Parts-27586"))()
+    end
+})
+
+Tabs.Exploits:AddButton({
+    Title = "Invisível",
+    Callback = function()
+        loadstring(game:HttpGet('https://pastebin.com/raw/3Rnd9rHf'))()
+    end
+})
+
+-- Aba: Configuração
+Tabs.Settings:AddButton({
+    Title = "Anti Kick",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/Exunys/Anti-Kick/main/Anti-Kick.lua"))()
+        notify("Anti Kick", "Proteção contra kick foi ativada.")
+    end
+})
+
+Tabs.Settings:AddButton({
+    Title = "FPS",
+    Callback = function()
+        local Players = game:GetService("Players")
+        local RunService = game:GetService("RunService")
+        local player = Players.LocalPlayer
+
+        local function createFPSCounter()
+            local playerGui = player:FindFirstChild("PlayerGui") or player:WaitForChild("PlayerGui")
+
+            -- Remover contador existente para evitar duplicações
+            local existingGui = playerGui:FindFirstChild("FPSCounter")
+            if existingGui then
+                existingGui:Destroy()
+            end
+
+            -- Criar novo ScreenGui
+            local screenGui = Instance.new("ScreenGui")
+            screenGui.Name = "FPSCounter"
+            screenGui.Parent = playerGui
+
+            -- Criar FPS Label
+            local fpsLabel = Instance.new("TextLabel")
+            fpsLabel.Size = UDim2.new(0, 80, 0, 25)
+            fpsLabel.Position = UDim2.new(1, -90, 0, 10)
+            fpsLabel.BackgroundTransparency = 0.3
+            fpsLabel.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+            fpsLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+            fpsLabel.TextScaled = false
+            fpsLabel.TextSize = 14
+            fpsLabel.Font = Enum.Font.Code
+            fpsLabel.Text = "FPS: 0"
+            fpsLabel.Parent = screenGui
+            fpsLabel.Active = true
+            fpsLabel.Draggable = true
+            fpsLabel.BorderSizePixel = 1
+            fpsLabel.BorderColor3 = Color3.new(1, 1, 1)
+            fpsLabel.TextStrokeTransparency = 0.6
+            fpsLabel.TextStrokeColor3 = Color3.new(0, 0, 0)
+
+            -- Variáveis para FPS
+            local lastTime = tick()
+            local frameCount = 0
+
+            -- Atualiza o FPS a cada segundo
+            RunService.RenderStepped:Connect(function()
+                frameCount = frameCount + 1
+                local currentTime = tick()
+                if currentTime - lastTime >= 1 then
+                    fpsLabel.Text = "FPS: " .. frameCount
+                    frameCount = 0
+                    lastTime = currentTime
+                end
+            end)
+        end
+
+        -- Criar o contador de FPS inicialmente
+        createFPSCounter()
+
+        -- Criar novamente após respawn
+        player.CharacterAdded:Connect(function()
+            wait(1) -- Pequeno delay para evitar problemas de carregamento
+            createFPSCounter()
+        end)
     end
 })
 
@@ -440,66 +530,32 @@ Tabs.Settings:AddButton({
     end
 })
 
-Tabs.Settings:AddButton({
-    Title = "FPS",
-    Callback = function()
-        local Players = game:GetService("Players")
-        local RunService = game:GetService("RunService")
-        local player = Players.LocalPlayer
+local safePosition = Vector3.new(0, 50, 0) -- Posição segura no mapa
+local voidLimit = -300
+local maxHeight = 300
+local isAntiVoidActive = false
 
-        local function createFPSCounter()
-            local playerGui = player:FindFirstChild("PlayerGui") or player:WaitForChild("PlayerGui")
-
-            -- Remover contador existente para evitar duplicações
-            local existingGui = playerGui:FindFirstChild("FPSCounter")
-            if existingGui then
-                existingGui:Destroy()
-            end
-
-            -- Criar novo ScreenGui
-            local screenGui = Instance.new("ScreenGui")
-            screenGui.Name = "FPSCounter"
-            screenGui.Parent = playerGui
-
-            -- Criar FPS Label
-            local fpsLabel = Instance.new("TextLabel")
-            fpsLabel.Size = UDim2.new(0, 80, 0, 25)
-            fpsLabel.Position = UDim2.new(1, -90, 0, 10)
-            fpsLabel.BackgroundTransparency = 1 -- Transparente
-            fpsLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-            fpsLabel.TextScaled = false
-            fpsLabel.TextSize = 14
-            fpsLabel.Font = Enum.Font.Code
-            fpsLabel.Text = "FPS: 0"
-            fpsLabel.Parent = screenGui
-            fpsLabel.Active = true
-            fpsLabel.Draggable = true
-            fpsLabel.TextStrokeTransparency = 0.6
-            fpsLabel.TextStrokeColor3 = Color3.new(0, 0, 0) -- Contorno leve
-
-            -- Variáveis para FPS
-            local lastTime = tick()
-            local frameCount = 0
-
-            -- Atualiza o FPS a cada segundo
-            RunService.RenderStepped:Connect(function()
-                frameCount = frameCount + 1
-                local currentTime = tick()
-                if currentTime - lastTime >= 1 then
-                    fpsLabel.Text = "FPS: " .. frameCount
-                    frameCount = 0
-                    lastTime = currentTime
-                end
-            end)
+local function checkVoid()
+    local humanoidRootPart = game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+    if humanoidRootPart then
+        local pos = humanoidRootPart.Position
+        if pos.Y < voidLimit or pos.Y > maxHeight then
+            humanoidRootPart.CFrame = CFrame.new(safePosition)
         end
+    end
+end
 
-        -- Criar o contador de FPS inicialmente
-        createFPSCounter()
+game:GetService("RunService").Stepped:Connect(function()
+    if isAntiVoidActive then
+        checkVoid()
+    end
+end)
 
-        -- Criar novamente após respawn
-        player.CharacterAdded:Connect(function()
-            wait(1) -- Pequeno delay para evitar problemas de carregamento
-            createFPSCounter()
-        end)
+Tabs.Settings:AddToggle("Anti Void", {
+    Title = "Anti Void",
+    Description = "Ativa/desativa Anti void",
+    Default = false,
+    Callback = function(state)
+        isAntiVoidActive = state
     end
 })
