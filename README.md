@@ -1,3 +1,7 @@
+-- Dragon menu 
+-- Desenvolvido por Victor 
+-- Script otimizado 
+
 -- Carregar Fluent
 local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
 
@@ -11,11 +15,11 @@ local function notify(title, content)
 end
 
 -- Aviso ao executar
-notify("Executado com Sucesso!", "Seja bem vindo.")
+notify("Executado com Sucesso!", "Melhor script universal.")
 
 -- Criar a janela principal
 local Window = Fluent:CreateWindow({
-    Title = "Dragon Menu  " .. Fluent.Version,
+    Title = "Dragon menu " .. Fluent.Version,
     TabWidth = 90,
     Size = UDim2.fromOffset(420, 310),
     Theme = "Dark"
@@ -24,8 +28,7 @@ local Window = Fluent:CreateWindow({
 -- Tabela de abas
 local Tabs = {
     Main = Window:AddTab({ Title = "Ínício" }),
-    Visual = Window:AddTab({ Title = "Visual" }),
-    Players = Window:AddTab({ Title = "Jogadores" }),
+    Players = Window:AddTab({ Title = "Jogador" }),
     Exploits = Window:AddTab({ Title = "Exploits" }),
     Settings = Window:AddTab({ Title = "Configuração" })
 }
@@ -139,200 +142,20 @@ Tabs.Main:AddSlider("WalkSpeed", {
     end
 })
 
-Tabs.Main:AddParagraph({ Title = "Segue nas redes sociais", Content = "Kwai:Vitoroficial Insta:vitoroemanuel"})
-
-Tabs.Visual:AddToggle("esp_nome_distancia", {
-    Title = "ESP Nome (Teste)",
-    Description = "Ativa/Desativa ESP Nome e Distância",
-    Default = false,
-    Callback = function(state)
-        local Players = game:GetService("Players")
-        local LocalPlayer = Players.LocalPlayer
-        local connections = {}
-
-        -- Função para criar ESP
-        local function criarESP(player)
-            if player == LocalPlayer then return end
-            if not state then return end -- Impede a criação se o ESP estiver desligado
-
-            local char = player.Character or player.CharacterAdded:Wait()
-            local head = char:WaitForChild("Head", 5)
-            if head and not head:FindFirstChild("ESP") then
-                local esp = Instance.new("BillboardGui")
-                esp.Name = "ESP"
-                esp.Adornee = head
-                esp.Size = UDim2.new(0, 150, 0, 50)  -- Ajusta o tamanho para incluir nome e distância
-                esp.StudsOffset = Vector3.new(0, 2, 0)
-                esp.AlwaysOnTop = true
-
-                local text = Instance.new("TextLabel")
-                text.Size = UDim2.new(1, 0, 1, 0)
-                text.BackgroundTransparency = 1
-                text.TextColor3 = Color3.fromRGB(255, 255, 255)  -- Cor branca
-                text.TextSize = 14  -- Tamanho da letra pequena
-                text.TextScaled = false  -- Não usa escala automática
-                text.Font = Enum.Font.GothamBold
-                text.TextStrokeTransparency = 0.4
-                text.TextStrokeColor3 = Color3.new(0, 0, 0)
-                text.Parent = esp
-
-                -- Atualiza o texto para incluir o nome e a distância
-                local function atualizarTexto()
-                    while state and char and char.Parent do
-                        local distancia = (LocalPlayer.Character.HumanoidRootPart.Position - char.HumanoidRootPart.Position).Magnitude
-                        text.Text = player.Name .. " - " .. math.floor(distancia) .. ""
-                        wait(0.1)  -- Atualiza a cada 0.1 segundos
-                    end
-                end
-
-                -- Atualizar o texto com a distância
-                task.spawn(atualizarTexto)
-                
-                esp.Parent = head
-            end
-        end
-
-        -- Função para remover ESP
-        local function removerESP(player)
-            if player.Character then
-                local esp = player.Character:FindFirstChild("ESP", true)
-                if esp then
-                    esp:Destroy()
-                end
-            end
-        end
-
-        -- Função para lidar com a recriação do ESP quando o jogador renascer (só se o ESP estiver ligado)
-        local function monitorarPersonagem(player)
-            -- Monitorar e recriar ESP apenas se o ESP estiver ligado
-            if state then
-                if connections[player] then
-                    connections[player]:Disconnect() -- Desconectar conexão antiga
-                end
-
-                connections[player] = player.CharacterAdded:Connect(function()
-                    wait(1)
-                    if state then
-                        criarESP(player)
-                    end
-                end)
-            end
-        end
-
-        -- Ativar ESP
-        if state then
-            for _, player in ipairs(Players:GetPlayers()) do
-                criarESP(player)
-                monitorarPersonagem(player)
-            end
-
-            -- Criar ESP para novos jogadores somente quando o ESP estiver ligado
-            connections["PlayerAdded"] = Players.PlayerAdded:Connect(function(player)
-                monitorarPersonagem(player)
-            end)
-        else
-            -- Desativar ESP completamente
-            for _, player in ipairs(Players:GetPlayers()) do
-                removerESP(player)
-            end
-
-            -- Desconectar evento de novos jogadores quando o ESP estiver desligado
-            if connections["PlayerAdded"] then
-                connections["PlayerAdded"]:Disconnect()
-                connections["PlayerAdded"] = nil
-            end
-        end
+Tabs.Main:AddSlider("Gravity", {
+    Title = "Gravidade",
+    Description = "Ajusta a gravidade do jogador",
+    Default = 196.2, -- Gravidade padrão no Roblox
+    Min = 0,
+    Max = 500,
+    Rounding = 1,
+    Callback = function(value)
+        game.Workspace.Gravity = value
+        notify("Gravidade", "Foi ajustada para: " .. value)
     end
 })
 
-Tabs.Visual:AddToggle("esp_box", {
-    Title = "ESP Box (Teste)",
-    Description = "Ativa/Desativa ESP Box",
-    Default = false,
-    Callback = function(state)
-        local Players = game:GetService("Players")
-        local LocalPlayer = Players.LocalPlayer
-        local RunService = game:GetService("RunService")
-        local connections = {}
-
-        -- Função para criar o ESP Box
-        local function criarESP(player)
-            if player == LocalPlayer then return end  -- Evita destacar o próprio jogador
-
-            local function adicionarHighlight(character)
-                if character and not character:FindFirstChild("ESPBox") then
-                    local highlight = Instance.new("Highlight")
-                    highlight.Name = "ESPBox"
-                    highlight.FillColor = Color3.fromRGB(255, 0, 0) -- Cor do preenchimento
-                    highlight.FillTransparency = 0.8 -- Transparência do preenchimento (0 = sólido, 1 = invisível)
-                    highlight.OutlineColor = Color3.fromRGB(255, 0, 0) -- Cor do contorno
-                    highlight.OutlineTransparency = 0 -- Transparência do contorno (0 = visível, 1 = invisível)
-                    highlight.Adornee = character
-                    highlight.Parent = character
-                end
-            end
-
-            -- Adiciona o Highlight ao personagem atual
-            if player.Character then
-                adicionarHighlight(player.Character)
-            end
-
-            -- Conecta ao evento CharacterAdded para adicionar o Highlight quando o personagem renascer
-            connections[player] = player.CharacterAdded:Connect(function(character)
-                adicionarHighlight(character)
-            end)
-        end
-
-        -- Função para remover o ESP Box
-        local function removerESP(player)
-            if connections[player] then
-                connections[player]:Disconnect()
-                connections[player] = nil
-            end
-            if player.Character then
-                local esp = player.Character:FindFirstChild("ESPBox")
-                if esp then
-                    esp:Destroy()
-                end
-            end
-        end
-
-        -- Ativar ou desativar o ESP
-        if state then
-            -- Ativa o ESP para jogadores existentes
-            for _, player in ipairs(Players:GetPlayers()) do
-                criarESP(player)
-            end
-
-            -- Conecta ao evento PlayerAdded para ativar o ESP para novos jogadores
-            connections["PlayerAdded"] = Players.PlayerAdded:Connect(function(player)
-                criarESP(player)
-            end)
-
-            -- Conecta ao evento PlayerRemoving para remover o ESP quando um jogador sair
-            connections["PlayerRemoving"] = Players.PlayerRemoving:Connect(function(player)
-                removerESP(player)
-            end)
-        else
-            -- Desativa o ESP para todos os jogadores
-            for _, player in ipairs(Players:GetPlayers()) do
-                removerESP(player)
-            end
-
-            -- Desconecta eventos globais
-            if connections["PlayerAdded"] then
-                connections["PlayerAdded"]:Disconnect()
-                connections["PlayerAdded"] = nil
-            end
-            if connections["PlayerRemoving"] then
-                connections["PlayerRemoving"]:Disconnect()
-                connections["PlayerRemoving"] = nil
-            end
-        end
-    end
-})
-
-Tabs.Visual:AddSlider("FOV", {
+Tabs.Main:AddSlider("FOV", {
     Title = "Campo de visão",
     Description = "Ajusta o campo de visão da câmera",
     Default = 70,
@@ -344,17 +167,55 @@ Tabs.Visual:AddSlider("FOV", {
     end
 })
 
+Tabs.Main:AddParagraph({ Title = "Quer saber as atualizações", Content = "Kwai:Vitoroficial Insta:vitoroemanuel"})
+
+-- Aba: Jogadores
 Tabs.Players:AddButton({
-    Title = "Teleporte",
+    Title = "ESP Nome",
     Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/Vitoarieshub/Teleporte-/refs/heads/main/README.md"))()
+        loadstring(game:HttpGet("https://pastebin.com/raw/rSUGN1fK"))()
     end
 })
+
+Tabs.Players:AddButton({
+    Title = "ESP Linhas",
+    Callback = function()
+        loadstring(game:HttpGet("https://pastebin.com/raw/nnHbfvGW"))()
+    end
+})
+
+Tabs.Players:AddParagraph({ Title = "Teleporte", Content = "Em breve " })
+
+
+Tabs.Players:AddParagraph({ Title = "Assistir Jogador", Content = "Funciona em todos os servidores" })
 
 Tabs.Players:AddButton({
     Title = "Assistir jogador",
     Callback = function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/Vitoarieshub/assistir-jogador-/refs/heads/main/README.md"))()
+    end
+})
+
+Tabs.Players:AddButton({
+    Title = "Click TP",
+    Callback = function()
+        mouse = game.Players.LocalPlayer:GetMouse()
+tool = Instance.new("Tool")
+tool.RequiresHandle = false
+tool.Name = "Equip to Click TP"
+tool.Activated:connect(function()
+local pos = mouse.Hit+Vector3.new(0,2.5,0)
+pos = CFrame.new(pos.X,pos.Y,pos.Z)
+game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = pos
+end)
+tool.Parent = game.Players.LocalPlayer.Backpack
+    end
+})
+
+Tabs.Players:AddButton({
+    Title = "Emote",
+    Callback = function()
+        loadstring(game:HttpGet("https://pastebin.com/raw/eCpipCTH"))()
     end
 })
 
@@ -365,6 +226,28 @@ Tabs.Exploits:AddButton({
     end
 })
 
+-- Aba: Exploits
+Tabs.Exploits:AddButton({
+    Title = Infiniteyield",
+    Callback = function()
+        loadstring(game:HttpGet('https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source'))()
+    end
+})
+
+Tabs.Exploits:AddButton({
+    Title = "Chat Bypass",
+    Callback = function()
+        loadstring(game:HttpGet("https://pastebin.com/raw/qJwH9964"))();
+    end
+})
+
+Tabs.Exploits:AddButton({
+    Title = "AutoJJs",
+    Callback = function()
+        loadstring(game:HttpGet('https://raw.githubusercontent.com/Zv-yz/AutoJJs/main/Main.lua'))(Options);
+    end
+})
+
 Tabs.Exploits:AddButton({
     Title = "Grudar portas",
     Callback = function()
@@ -372,37 +255,19 @@ Tabs.Exploits:AddButton({
     end
 })
 
--- Variável para armazenar o estado das notificações
-local notificacaoAtivada = false
-
--- Função para exibir notificações
-local function notify(title, text)
-    if notificacaoAtivada then
-        game.StarterGui:SetCore("SendNotification", {
-            Title = title,
-            Text = text,
-            Duration = 5
-        })
+Tabs.Exploits:AddButton({
+    Title = "Invisível",
+    Callback = function()
+        loadstring(game:HttpGet('https://pastebin.com/raw/3Rnd9rHf'))()
     end
-end
+})
 
--- Notifica quando um jogador entra no jogo
-game.Players.PlayerAdded:Connect(function(player)
-    notify("Jogador", player.Name .. " entrou no jogo.")
-end)
-
--- Notifica quando um jogador sai do jogo
-game.Players.PlayerRemoving:Connect(function(player)
-    notify("Jogador", player.Name .. " saiu do jogo.")
-end)
-
--- Adiciona a opção de ativar/desativar notificações
-Tabs.Settings:AddToggle("notificacao", {
-    Title = "Notificações",
-    Description = "de entrada/saída de jogadores",
-    Default = false,
-    Callback = function(state)
-        notificacaoAtivada = state
+-- Aba: Configuração
+Tabs.Settings:AddButton({
+    Title = "Anti Kick",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/Exunys/Anti-Kick/main/Anti-Kick.lua"))()
+        notify("Anti Kick", "Proteção contra kick foi ativada.")
     end
 })
 
@@ -431,7 +296,8 @@ Tabs.Settings:AddButton({
             local fpsLabel = Instance.new("TextLabel")
             fpsLabel.Size = UDim2.new(0, 80, 0, 25)
             fpsLabel.Position = UDim2.new(1, -90, 0, 10)
-            fpsLabel.BackgroundTransparency = 1 -- Transparente
+            fpsLabel.BackgroundTransparency = 0.3
+            fpsLabel.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
             fpsLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
             fpsLabel.TextScaled = false
             fpsLabel.TextSize = 14
@@ -440,8 +306,10 @@ Tabs.Settings:AddButton({
             fpsLabel.Parent = screenGui
             fpsLabel.Active = true
             fpsLabel.Draggable = true
+            fpsLabel.BorderSizePixel = 1
+            fpsLabel.BorderColor3 = Color3.new(1, 1, 1)
             fpsLabel.TextStrokeTransparency = 0.6
-            fpsLabel.TextStrokeColor3 = Color3.new(0, 0, 0) -- Contorno leve
+            fpsLabel.TextStrokeColor3 = Color3.new(0, 0, 0)
 
             -- Variáveis para FPS
             local lastTime = tick()
@@ -510,10 +378,32 @@ Tabs.Settings:AddButton({
     end
 })
 
-Tabs.Settings:AddButton({
-    Title = "Anti Kick",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/Exunys/Anti-Kick/main/Anti-Kick.lua"))()
-        notify("Anti Kick", "Proteção contra kick foi ativada.")
+local safePosition = Vector3.new(0, 50, 0) -- Posição segura no mapa
+local voidLimit = -300
+local maxHeight = 300
+local isAntiVoidActive = false
+
+local function checkVoid()
+    local humanoidRootPart = game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+    if humanoidRootPart then
+        local pos = humanoidRootPart.Position
+        if pos.Y < voidLimit or pos.Y > maxHeight then
+            humanoidRootPart.CFrame = CFrame.new(safePosition)
+        end
+    end
+end
+
+game:GetService("RunService").Stepped:Connect(function()
+    if isAntiVoidActive then
+        checkVoid()
+    end
+end)
+
+Tabs.Settings:AddToggle("Anti Void", {
+    Title = "Anti Void",
+    Description = "Ativa/desativa Anti void",
+    Default = false,
+    Callback = function(state)
+        isAntiVoidActive = state
     end
 })
