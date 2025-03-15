@@ -17,7 +17,7 @@ notify("Executado com Sucesso!", "Seja bem vindo.")
 local Window = Fluent:CreateWindow({
     Title = "Dragon Menu  " .. Fluent.Version,
     TabWidth = 90,
-    Size = UDim2.fromOffset(420, 310),
+    Size = UDim2.fromOffset(210, 210),
     Theme = "Dark"
 })
 
@@ -145,9 +145,9 @@ Tabs.Main:AddParagraph({ Title = "Segue nas redes sociais", Content = "Kwai:Vito
 local espAtivado = false
 local connections = {}
 
-Tabs.Visual:AddToggle("esp_nome", {
+Tabs.Visual:AddToggle("esp_nome_distancia", {
     Title = "ESP Nome (Atualizado)",
-    Description = "Ativa/Desativa ESP mostrando apenas o nome",
+    Description = "Ativa/Desativa ESP Nome e Distância",
     Default = false,
     Callback = function(state)
         espAtivado = state
@@ -160,53 +160,70 @@ Tabs.Visual:AddToggle("esp_nome", {
             if not espAtivado then return end -- Impede a criação se o ESP estiver desligado
 
             local char = player.Character or player.CharacterAdded:Wait()
-            local head = char:WaitForChild("Head", 5)
-            if head then
+            local head = char:FindFirstChild("Head", 5)
+            local humanoid = char:FindFirstChild("Humanoid")
+
+            if head and humanoid then
                 local esp = head:FindFirstChild("ESP")
                 if not esp then
                     esp = Instance.new("BillboardGui")
                     esp.Name = "ESP"
                     esp.Adornee = head
-                    esp.Size = UDim2.new(0, 150, 0, 50)  
+                    esp.Size = UDim2.new(0, 150, 0, 50) -- Ajusta o tamanho para incluir nome e distância
                     esp.StudsOffset = Vector3.new(0, 2, 0)
                     esp.AlwaysOnTop = true
 
                     local text = Instance.new("TextLabel")
                     text.Size = UDim2.new(1, 0, 1, 0)
                     text.BackgroundTransparency = 1
-                    text.TextColor3 = Color3.fromRGB(255, 255, 255)  -- Cor branca
-                    text.TextSize = 14
-                    text.TextScaled = false
+                    text.TextColor3 = Color3.fromRGB(255, 255, 255) -- Cor branca
+                    text.TextSize = 14 -- Tamanho da fonte
+                    text.TextScaled = false -- Não usa escala automática
                     text.Font = Enum.Font.GothamBold
                     text.TextStrokeTransparency = 0.4
                     text.TextStrokeColor3 = Color3.new(0, 0, 0)
-                    text.Text = player.Name  -- Agora exibe apenas o nome do jogador
                     text.Parent = esp
 
                     esp.Parent = head
                 end
-            end
-        end
 
-        -- Função para remover ESP
-        local function removerESP(player)
-            if player.Character then
-                local esp = player.Character:FindFirstChild("ESP", true)
-                if esp then
-                    esp:Destroy()
+                -- Atualiza o texto para incluir o nome e a distância
+                local function atualizarTexto()
+                    while espAtivado and char and char.Parent and head.Parent and humanoid.Health > 0 do
+                        if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") and char:FindFirstChild("HumanoidRootPart") then
+                            local distancia = (LocalPlayer.Character.HumanoidRootPart.Position - char.HumanoidRootPart.Position).Magnitude
+                            esp.TextLabel.Text = player.Name .. " - " .. math.floor(distancia) .. "m"
+                        end
+                        wait(0.1) -- Atualiza a cada 0.1 segundos
+                    end
+
+                    -- Remove o ESP quando o personagem morre
+                    if esp then
+                        esp:Destroy()
+                    end
                 end
+
+                -- Inicia a atualização do texto
+                task.spawn(atualizarTexto)
+
+                -- Adiciona um evento para remover o ESP quando o jogador morre
+                humanoid.Died:Connect(function()
+                    if esp then
+                        esp:Destroy()
+                    end
+                end)
             end
         end
 
-        -- Função para monitorar renascimentos e atualizar ESP
+        -- Função para monitorar renascimentos e atualizar ESP automaticamente
         local function monitorarPersonagem(player)
             if espAtivado then
                 if connections[player] then
                     connections[player]:Disconnect() -- Desconectar conexão antiga
                 end
 
-                connections[player] = player.CharacterAdded:Connect(function()
-                    wait(1)
+                connections[player] = player.CharacterAdded:Connect(function(char)
+                    wait(1) -- Espera o personagem carregar
                     if espAtivado then
                         criarESP(player)
                     end
@@ -214,14 +231,14 @@ Tabs.Visual:AddToggle("esp_nome", {
             end
         end
 
-        -- Ativar ESP
+        -- Ativar ESP para todos os jogadores
         if espAtivado then
             for _, player in ipairs(Players:GetPlayers()) do
                 criarESP(player)
                 monitorarPersonagem(player)
             end
 
-            -- Criar ESP para novos jogadores
+            -- Criar ESP para novos jogadores somente quando o ESP estiver ligado
             connections["PlayerAdded"] = Players.PlayerAdded:Connect(function(player)
                 monitorarPersonagem(player)
                 criarESP(player)
@@ -229,7 +246,10 @@ Tabs.Visual:AddToggle("esp_nome", {
         else
             -- Desativar ESP completamente
             for _, player in ipairs(Players:GetPlayers()) do
-                removerESP(player)
+                if connections[player] then
+                    connections[player]:Disconnect()
+                    connections[player] = nil
+                end
             end
 
             -- Desconectar evento de novos jogadores quando o ESP estiver desligado
@@ -238,6 +258,89 @@ Tabs.Visual:AddToggle("esp_nome", {
                 connections["PlayerAdded"] = nil
             end
         end
+    end
+})
+
+-- Serviços do Roblox
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local LocalPlayer = Players.LocalPlayer
+
+-- Tabela para armazenar ESPs ativos
+local ESPs = {}
+
+-- Função para criar ESP Box (cabeça até os pés)
+local function criarESP(jogador)
+    if jogador == LocalPlayer then return end -- Evita criar ESP para si mesmo
+
+    local char = jogador.Character
+    if not char or not char:FindFirstChild("HumanoidRootPart") then return end
+
+    -- Criando Highlight para o efeito de destaque
+    local espHighlight = Instance.new("Highlight", char)
+    espHighlight.Name = "ESP_Box"
+    espHighlight.FillColor = Color3.fromRGB(255, 255, 255) -- Preenchimento branco
+    espHighlight.FillTransparency = 0.8 -- Transparência do preenchimento
+    espHighlight.OutlineColor = Color3.fromRGB(255, 255, 255) -- Bordas brancas
+    espHighlight.OutlineTransparency = 0.1 -- Transparência das bordas
+
+    ESPs[jogador] = espHighlight
+end
+
+-- Função para remover ESP Box
+local function removerESP(jogador)
+    if ESPs[jogador] then
+        ESPs[jogador]:Destroy()
+        ESPs[jogador] = nil
+    end
+end
+
+-- Conectar a função de criação de ESP ao evento CharacterAdded de cada jogador
+Players.PlayerAdded:Connect(function(jogador)
+    jogador.CharacterAdded:Connect(function()
+        -- Só cria o ESP se o ESP Box estiver ativado
+        if espBoxAtivo then
+            criarESP(jogador)
+        end
+    end)
+end)
+
+-- Conectar a função de remoção de ESP ao evento CharacterRemoving de cada jogador
+Players.PlayerRemoving:Connect(function(jogador)
+    removerESP(jogador)
+end)
+
+-- Variável para armazenar o estado do ESP Box (ativado ou desativado)
+local espBoxAtivo = false
+
+-- Função para ativar/desativar ESP
+local function ativarESP(estado)
+    espBoxAtivo = estado
+
+    if espBoxAtivo then
+        -- Cria o ESP para jogadores que já estão no jogo
+        for _, jogador in pairs(Players:GetPlayers()) do
+            if jogador.Character then
+                criarESP(jogador)
+            end
+        end
+    else
+        -- Remove o ESP de todos os jogadores
+        for _, esp in pairs(ESPs) do
+            esp:Destroy()
+        end
+        ESPs = {}
+    end
+end
+
+-- Criando Toggle no menu
+Tabs.Visual:AddToggle("esp_box_cabeca_pes", {
+    Title = "ESP Box",
+    Description = "Ativa/Desativa ESP Box",
+    Default = false,
+
+    Callback = function(state)
+        ativarESP(state)
     end
 })
 
@@ -348,8 +451,8 @@ end
 
 -- Adiciona a opção de ativar/desativar o ESP
 Tabs.Visual:AddToggle("esp_linha_rgb", {
-    Title = "ESP Linhas",
-    Description = "Linhas com efeito RGB",
+    Title = "ESP Linha",
+    Description = "Ativa/Desativa ESP linha",
     Default = false,
     Callback = function(state)
         espAtivado = state
@@ -361,15 +464,41 @@ Tabs.Visual:AddToggle("esp_linha_rgb", {
     end
 })
 
+-- Variável para armazenar o estado do FOV (ativado ou desativado)
+local fovAtivo = false
+local fovPadrao = 70 -- Define o valor padrão do FOV quando desativado
+local fovAtual = 70   -- Valor inicial do FOV ajustável
+
+-- Criando Slider para ajustar o FOV
 Tabs.Visual:AddSlider("FOV", {
     Title = "Campo de visão",
     Description = "Ajusta o campo de visão da câmera",
-    Default = 70,
+    Default = fovAtual,
     Min = 30,
     Max = 120, -- Máximo permitido pelo Roblox
     Rounding = 1,
+
     Callback = function(value)
-        game.Workspace.CurrentCamera.FieldOfView = value
+        fovAtual = value
+        if fovAtivo then
+            game.Workspace.CurrentCamera.FieldOfView = fovAtual
+        end
+    end
+})
+
+-- Criando Toggle para ativar/desativar FOV
+Tabs.Visual:AddToggle("FOV_Toggle", {
+    Title = "Campo de visão",
+    Description = "Ativa ou desativa o efeito de campo de visão",
+    Default = false,
+
+    Callback = function(state)
+        fovAtivo = state
+        if fovAtivo then
+            game.Workspace.CurrentCamera.FieldOfView = fovAtual -- Aplica o FOV escolhido
+        else
+            game.Workspace.CurrentCamera.FieldOfView = fovPadrao -- Volta ao normal
+        end
     end
 })
 
@@ -477,72 +606,4 @@ Tabs.Settings:AddButton({
             local frameCount = 0
 
             -- Atualiza o FPS a cada segundo
-            RunService.RenderStepped:Connect(function()
-                frameCount = frameCount + 1
-                local currentTime = tick()
-                if currentTime - lastTime >= 1 then
-                    fpsLabel.Text = "FPS: " .. frameCount
-                    frameCount = 0
-                    lastTime = currentTime
-                end
-            end)
-        end
-
-        -- Criar o contador de FPS inicialmente
-        createFPSCounter()
-
-        -- Criar novamente após respawn
-        player.CharacterAdded:Connect(function()
-            wait(1) -- Pequeno delay para evitar problemas de carregamento
-            createFPSCounter()
-        end)
-    end
-})
-
-Tabs.Settings:AddButton({
-    Title = "FPS Boost",
-    Callback = function()
-        -- Otimiza todas as partes para reduzir o impacto gráfico
-        for _, v in ipairs(workspace:GetDescendants()) do
-            if v:IsA("Part") or v:IsA("MeshPart") or v:IsA("UnionOperation") then
-                v.Material = Enum.Material.SmoothPlastic -- Remove texturas complexas
-                v.Reflectance = 0 -- Remove reflexos
-                v.CastShadow = false -- Desativa sombras
-            elseif v:IsA("Decal") or v:IsA("Texture") then
-                v.Transparency = 1 -- Oculta texturas e decals
-            elseif v:IsA("ParticleEmitter") or v:IsA("Trail") or v:IsA("Smoke") or v:IsA("Fire") or v:IsA("Explosion") then
-                v:Destroy() -- Remove efeitos que consomem desempenho
-            end
-        end
-
-        -- Ajusta configurações para melhorar o FPS
-        pcall(function()
-            settings().Rendering.QualityLevel = Enum.QualityLevel.Level01 -- Reduz a qualidade gráfica
-            workspace.GlobalShadows = false -- Remove sombras globais
-            
-            if game:FindFirstChild("Lighting") then
-                local lighting = game.Lighting
-                lighting.FogEnd = 9e9 -- Remove neblina
-                lighting.GlobalShadows = false -- Desativa sombras globais
-                lighting.Brightness = 2 -- Ajusta o brilho para compensar a remoção de sombras
-            end
-        end)
-
-        -- Notificação de sucesso (se houver sistema de notificação)
-        if Fluent then
-            Fluent:Notify({
-                Title = "FPS Boost",
-                Content = "Otimização aplicada!",
-                Duration = 3
-            })
-        end
-    end
-})
-
-Tabs.Settings:AddButton({
-    Title = "Anti Kick",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/Exunys/Anti-Kick/main/Anti-Kick.lua"))()
-        notify("Anti Kick", "Proteção contra kick foi ativada.")
-    end
-})
+            RunService.RenderStepped:Connect(funct
