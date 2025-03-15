@@ -381,15 +381,41 @@ Tabs.Visual:AddToggle("esp_linha_rgb", {
     end
 })
 
+-- Variável para armazenar o estado do FOV (ativado ou desativado)
+local fovAtivo = false
+local fovPadrao = 70 -- Define o valor padrão do FOV quando desativado
+local fovAtual = 70   -- Valor inicial do FOV ajustável
+
+-- Criando Slider para ajustar o FOV
 Tabs.Visual:AddSlider("FOV", {
     Title = "Campo de visão",
     Description = "Ajusta o campo de visão da câmera",
-    Default = 70,
+    Default = fovAtual,
     Min = 30,
     Max = 120, -- Máximo permitido pelo Roblox
     Rounding = 1,
+
     Callback = function(value)
-        game.Workspace.CurrentCamera.FieldOfView = value
+        fovAtual = value
+        if fovAtivo then
+            game.Workspace.CurrentCamera.FieldOfView = fovAtual
+        end
+    end
+})
+
+-- Criando Toggle para ativar/desativar FOV
+Tabs.Visual:AddToggle("FOV_Toggle", {
+    Title = "Campo de visão",
+    Description = "Ativa ou desativa  campo de visão",
+    Default = false,
+
+    Callback = function(state)
+        fovAtivo = state
+        if fovAtivo then
+            game.Workspace.CurrentCamera.FieldOfView = fovAtual -- Aplica o FOV escolhido
+        else
+            game.Workspace.CurrentCamera.FieldOfView = fovPadrao -- Volta ao normal
+        end
     end
 })
 
