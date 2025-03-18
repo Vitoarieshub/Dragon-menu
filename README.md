@@ -17,7 +17,7 @@ notify("Executado com Sucesso!", "Seja bem vindo.")
 local Window = Fluent:CreateWindow({
     Title = "Dragon Menu  " .. Fluent.Version,
     TabWidth = 90,
-    Size = UDim2.fromOffset(420, 310),
+    Size = UDim2.fromOffset(370, 300),
     Theme = "Dark"
 })
 
