@@ -86,7 +86,7 @@ local function toggleNoclip(enable)
 end
 
 -- Aba: Início
-Tabs.Main:AddParagraph({ Title = "Programador Victor", Content = "Scripts personalizados" })
+Tabs.Main:AddParagraph({ Title = "Programador Victor", Content = "Scripts atualizados" })
 
 Tabs.Main:AddButton({
     Title = "Fly",
@@ -192,7 +192,7 @@ Tabs.Visual:AddToggle("esp_nome_distancia", {
                     while espAtivado and char and char.Parent and head.Parent and humanoid.Health > 0 do
                         if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") and char:FindFirstChild("HumanoidRootPart") then
                             local distancia = (LocalPlayer.Character.HumanoidRootPart.Position - char.HumanoidRootPart.Position).Magnitude
-                            esp.TextLabel.Text = player.Name .. " - " .. math.floor(distancia) .. "m"
+                            esp.TextLabel.Text = player.Name .. " ( " .. math.floor(distancia) .. "m)"
                         end
                         wait(0.1) -- Atualiza a cada 0.1 segundos
                     end
@@ -418,6 +418,8 @@ Tabs.Visual:AddToggle("FOV_Toggle", {
         end
     end
 })
+
+Tabs.Players:AddParagraph({ Title = " clientes do script ", Content = "@KokbobDEV"})
 
 Tabs.Players:AddButton({
     Title = "Teleporte",
