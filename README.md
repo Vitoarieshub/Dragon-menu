@@ -28,6 +28,7 @@ local Tabs = {
     Players = Window:AddTab({ Title = "Jogadores" }),
     Exploits = Window:AddTab({ Title = "Exploits" }),
     Settings = Window:AddTab({ Title = "Configuração" })
+    Cliente = Window:AddTab({ Title = "Clientes" })
 }
 
 -- Funções utilitárias
@@ -419,8 +420,6 @@ Tabs.Visual:AddToggle("FOV_Toggle", {
     end
 })
 
-Tabs.Players:AddParagraph({ Title = " Clientes do Dragon menu", Content = "@KokbobDEV"})
-
 Tabs.Players:AddButton({
     Title = "Teleporte",
     Callback = function()
@@ -507,7 +506,7 @@ Tabs.Settings:AddButton({
             -- Criar FPS Label
             local fpsLabel = Instance.new("TextLabel")
             fpsLabel.Size = UDim2.new(0, 80, 0, 25)
-            fpsLabel.Position = UDim2.new(0.5, -50, 0, 5)
+            fpsLabel.Position = UDim2.new(1, -290, 0, 1)
             fpsLabel.BackgroundTransparency = 2 -- Transparente
             fpsLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
             fpsLabel.TextScaled = false
@@ -586,3 +585,5 @@ Tabs.Settings:AddButton({
         end
     end
 })
+
+Tabs.Cliente:AddParagraph({ Title = " Clientes d
