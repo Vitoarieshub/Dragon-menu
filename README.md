@@ -508,7 +508,7 @@ Tabs.Settings:AddButton({
             local fpsLabel = Instance.new("TextLabel")
             fpsLabel.Size = UDim2.new(0, 80, 0, 25)
             fpsLabel.Position = UDim2.new(1, -90, 0, 10)
-            fpsLabel.BackgroundTransparency = 1 -- Transparente
+            fpsLabel.BackgroundTransparency = 9 -- Transparente
             fpsLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
             fpsLabel.TextScaled = false
             fpsLabel.TextSize = 14
@@ -557,7 +557,7 @@ Tabs.Settings:AddButton({
                 v.Reflectance = 0 -- Remove reflexos
                 v.CastShadow = false -- Desativa sombras
             elseif v:IsA("Decal") or v:IsA("Texture") then
-                v.Transparency = 1 -- Oculta texturas e decals
+                v.Transparency = 9 -- Oculta texturas e decals
             elseif v:IsA("ParticleEmitter") or v:IsA("Trail") or v:IsA("Smoke") or v:IsA("Fire") or v:IsA("Explosion") then
                 v:Destroy() -- Remove efeitos que consomem desempenho
             end
