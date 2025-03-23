@@ -484,7 +484,7 @@ Tabs.Settings:AddToggle("notificacao", {
 })
 
 Tabs.Settings:AddButton({
-    Title = "FPS (Atualizado)",
+    Title = "FPS",
     Callback = function()
         local Players = game:GetService("Players")
         local RunService = game:GetService("RunService")
@@ -506,18 +506,18 @@ Tabs.Settings:AddButton({
 
             -- Criar FPS Label
             local fpsLabel = Instance.new("TextLabel")
-            fpsLabel.Size = UDim2.new(0, 100, 0, 30) -- Aumentado um pouco para melhor visibilidade
-            fpsLabel.Position = UDim2.new(1, -120, 0, 5) -- Mais para a direita e mais para cima
+            fpsLabel.Size = UDim2.new(0, 80, 0, 25)
+            fpsLabel.Position = UDim2.new(1, -120, 0, 5)
             fpsLabel.BackgroundTransparency = 2 -- Transparente
             fpsLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
             fpsLabel.TextScaled = false
-            fpsLabel.TextSize = 16 -- Aumentado para melhor leitura
+            fpsLabel.TextSize = 14
             fpsLabel.Font = Enum.Font.Code
             fpsLabel.Text = "FPS: 0"
             fpsLabel.Parent = screenGui
             fpsLabel.Active = true
             fpsLabel.Draggable = true
-            fpsLabel.TextStrokeTransparency = 0.15 -- Melhorando visibilidade
+            fpsLabel.TextStrokeTransparency = 0.20
             fpsLabel.TextStrokeColor3 = Color3.new(0, 0, 0) -- Contorno leve
 
             -- Variáveis para FPS
@@ -579,4 +579,10 @@ Tabs.Settings:AddButton({
         -- Notificação de sucesso (se houver sistema de notificação)
         if Fluent then
             Fluent:Notify({
-        
+                Title = "FPS Boost",
+                Content = "Otimização aplicada!",
+                Duration = 3
+            })
+        end
+    end
+})
