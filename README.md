@@ -28,7 +28,6 @@ local Tabs = {
     Players = Window:AddTab({ Title = "Jogadores" }),
     Exploits = Window:AddTab({ Title = "Exploits" }),
     Settings = Window:AddTab({ Title = "Configuração" })
-    Cliente = Window:AddTab({ Title = "Clientes" })
 }
 
 -- Funções utilitárias
@@ -128,17 +127,62 @@ Tabs.Main:AddSlider("JumpPower", {
     end
 })
 
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local humanoid = character:FindFirstChildOfClass("Humanoid")
+
+local walkSpeedEnabled = false
+local defaultWalkSpeed = 16 -- Velocidade padrão do Roblox
+local customWalkSpeed = 20 -- Valor inicial do slider
+
+-- Função para definir a velocidade do jogador
+local function setWalkSpeed(value)
+    if humanoid then
+        customWalkSpeed = value
+        if walkSpeedEnabled then
+            humanoid.WalkSpeed = value
+        end
+    end
+end
+
+-- Slider para ajustar a velocidade
 Tabs.Main:AddSlider("WalkSpeed", {
     Title = "Velocidade",
     Description = "Define a velocidade do jogador",
-    Default = 20,
+    Default = customWalkSpeed,
     Min = 0,
     Max = 200,
     Rounding = 1,
     Callback = function(value)
-        setHumanoidProperty("WalkSpeed", value)
+        setWalkSpeed(value)
     end
 })
+
+-- Toggle para ativar/desativar a velocidade
+Tabs.Main:AddToggle("Velocidade", {
+    Title = "Velocidade",
+    Description = "Ativa/desativa a Velocidade",
+    Default = false,
+    Callback = function(state)
+        walkSpeedEnabled = state
+        if humanoid then
+            if state then
+                humanoid.WalkSpeed = customWalkSpeed
+            else
+                humanoid.WalkSpeed = defaultWalkSpeed
+            end
+        end
+    end
+})
+
+-- Garantir que o humanoide seja atualizado após respawn
+player.CharacterAdded:Connect(function(newCharacter)
+    humanoid = newCharacter:FindFirstChildOfClass("Humanoid")
+    if not walkSpeedEnabled then
+        humanoid.WalkSpeed = defaultWalkSpeed
+    end
+end)
 
 Tabs.Main:AddParagraph({ Title = "Segue nas redes sociais", Content = "Kwai:Vitoroficial Insta:vitoroemanuel"})
 
@@ -555,35 +599,4 @@ Tabs.Settings:AddButton({
                 v.Material = Enum.Material.SmoothPlastic -- Remove texturas complexas
                 v.Reflectance = 0 -- Remove reflexos
                 v.CastShadow = false -- Desativa sombras
-            elseif v:IsA("Decal") or v:IsA("Texture") then
-                v.Transparency = 9 -- Oculta texturas e decals
-            elseif v:IsA("ParticleEmitter") or v:IsA("Trail") or v:IsA("Smoke") or v:IsA("Fire") or v:IsA("Explosion") then
-                v:Destroy() -- Remove efeitos que consomem desempenho
-            end
-        end
-
-        -- Ajusta configurações para melhorar o FPS
-        pcall(function()
-            settings().Rendering.QualityLevel = Enum.QualityLevel.Level01 -- Reduz a qualidade gráfica
-            workspace.GlobalShadows = false -- Remove sombras globais
-            
-            if game:FindFirstChild("Lighting") then
-                local lighting = game.Lighting
-                lighting.FogEnd = 9e9 -- Remove neblina
-                lighting.GlobalShadows = false -- Desativa sombras globais
-                lighting.Brightness = 2 -- Ajusta o brilho para compensar a remoção de sombras
-            end
-        end)
-
-        -- Notificação de sucesso (se houver sistema de notificação)
-        if Fluent then
-            Fluent:Notify({
-                Title = "FPS Boost",
-                Content = "Otimização aplicada!",
-                Duration = 3
-            })
-        end
-    end
-})
-
-Tabs.Cliente:AddParagraph({ Title = " Clientes d
+    
