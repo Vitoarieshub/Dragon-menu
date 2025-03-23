@@ -192,7 +192,7 @@ Tabs.Visual:AddToggle("esp_nome_distancia", {
                     while espAtivado and char and char.Parent and head.Parent and humanoid.Health > 0 do
                         if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") and char:FindFirstChild("HumanoidRootPart") then
                             local distancia = (LocalPlayer.Character.HumanoidRootPart.Position - char.HumanoidRootPart.Position).Magnitude
-                            esp.TextLabel.Text = player.Name .. " ( " .. math.floor(distancia) .. "m)"
+                            esp.TextLabel.Text = player.Name .. " [" .. math.floor(distancia) .. "m]"
                         end
                         wait(0.1) -- Atualiza a cada 0.1 segundos
                     end
@@ -368,8 +368,8 @@ end
 
 -- Adiciona a opção de ativar/desativar o ESP
 Tabs.Visual:AddToggle("esp_linha_rgb", {
-    Title = "ESP Linha (Atualizado)",
-    Description = "Ativa/Desativa ESP linha",
+    Title = "ESP Linha",
+    Description = "Ativa/Desativa ESP linha RGB",
     Default = false,
     Callback = function(state)
         espAtivado = state
@@ -517,7 +517,7 @@ Tabs.Settings:AddButton({
             fpsLabel.Parent = screenGui
             fpsLabel.Active = true
             fpsLabel.Draggable = true
-            fpsLabel.TextStrokeTransparency = 0.6
+            fpsLabel.TextStrokeTransparency = 0.10
             fpsLabel.TextStrokeColor3 = Color3.new(0, 0, 0) -- Contorno leve
 
             -- Variáveis para FPS
