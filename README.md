@@ -449,13 +449,6 @@ Tabs.Exploits:AddButton({
     end
 })
 
-Tabs.Exploits:AddButton({
-    Title = "Emote",
-    Callback = function()
-        loadstring(game:HttpGet("https://pastebin.com/raw/eCpipCTH"))()
-    end
-})
-
 -- Variável para armazenar o estado das notificações
 local notificacaoAtivada = false
 
@@ -586,4 +579,10 @@ Tabs.Settings:AddButton({
         -- Notificação de sucesso (se houver sistema de notificação)
         if Fluent then
             Fluent:Notify({
-       
+                Title = "FPS Boost",
+                Content = "Otimização aplicada!",
+                Duration = 3
+            })
+        end
+    end
+})
