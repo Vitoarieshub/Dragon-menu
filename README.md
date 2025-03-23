@@ -508,7 +508,7 @@ Tabs.Settings:AddButton({
             local fpsLabel = Instance.new("TextLabel")
             fpsLabel.Size = UDim2.new(0, 80, 0, 25)
             fpsLabel.Position = UDim2.new(1, -90, 0, 10)
-            fpsLabel.BackgroundTransparency = 9 -- Transparente
+            fpsLabel.BackgroundTransparency = 2 -- Transparente
             fpsLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
             fpsLabel.TextScaled = false
             fpsLabel.TextSize = 14
@@ -517,7 +517,7 @@ Tabs.Settings:AddButton({
             fpsLabel.Parent = screenGui
             fpsLabel.Active = true
             fpsLabel.Draggable = true
-            fpsLabel.TextStrokeTransparency = 0.10
+            fpsLabel.TextStrokeTransparency = 0.20
             fpsLabel.TextStrokeColor3 = Color3.new(0, 0, 0) -- Contorno leve
 
             -- Variáveis para FPS
@@ -572,7 +572,7 @@ Tabs.Settings:AddButton({
                 local lighting = game.Lighting
                 lighting.FogEnd = 9e9 -- Remove neblina
                 lighting.GlobalShadows = false -- Desativa sombras globais
-                lighting.Brightness = 2 -- Ajusta o brilho para compensar a remoção de sombras
+                lighting.Brightness = 7 -- Ajusta o brilho para compensar a remoção de sombras
             end
         end)
 
