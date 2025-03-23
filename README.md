@@ -507,7 +507,7 @@ Tabs.Settings:AddButton({
             -- Criar FPS Label
             local fpsLabel = Instance.new("TextLabel")
             fpsLabel.Size = UDim2.new(0, 80, 0, 25)
-            fpsLabel.Position = UDim2.new(0.5, -60, 0, 5)
+            fpsLabel.Position = UDim2.new(0.5, -50, 0, 5)
             fpsLabel.BackgroundTransparency = 2 -- Transparente
             fpsLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
             fpsLabel.TextScaled = false
