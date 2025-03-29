@@ -263,87 +263,6 @@ Tabs.Visual:AddToggle("esp_nome_distancia", {
 
 -- Variável para armazenar o estado do ESP
 local espAtivado = false
-local connections = {}
-
--- Função para criar o ESP Box
-local function criarESP(player)
-    if not espAtivado then return end
-    if player == game.Players.LocalPlayer then return end
-
-    local character = player.Character or player.CharacterAdded:Wait()
-    local highlight = character:FindFirstChild("Highlight")
-
-    if not highlight then
-        highlight = Instance.new("Highlight")
-        highlight.Name = "Highlight"
-        highlight.Adornee = character
-        highlight.FillColor = Color3.fromRGB(255, 255, 255) -- Cor branca
-        highlight.FillTransparency = 0.5 -- Ajuste conforme necessário
-        highlight.OutlineColor = Color3.fromRGB(255, 255, 255) -- Cor branca
-        highlight.OutlineTransparency = 0
-        highlight.Parent = character
-    end
-end
-
--- Função para remover o ESP Box
-local function removerESP(player)
-    local character = player.Character
-    if character then
-        local highlight = character:FindFirstChild("Highlight")
-        if highlight then
-            highlight:Destroy()
-        end
-    end
-end
-
--- Função para ativar o ESP para todos os jogadores
-local function ativarESP()
-    for _, player in ipairs(game.Players:GetPlayers()) do
-        if player ~= game.Players.LocalPlayer then
-            criarESP(player)
-            connections[player] = player.CharacterAdded:Connect(function()
-                criarESP(player)
-            end)
-        end
-    end
-
-    -- Conectar novos jogadores
-    connections["PlayerAdded"] = game.Players.PlayerAdded:Connect(function(player)
-        criarESP(player)
-        connections[player] = player.CharacterAdded:Connect(function()
-            criarESP(player)
-        end)
-    end)
-end
-
--- Função para desativar o ESP
-local function desativarESP()
-    for player, connection in pairs(connections) do
-        if connection then
-            connection:Disconnect()
-        end
-        removerESP(player)
-    end
-    connections = {}
-end
-
--- Adiciona a opção ao menu
-Tabs.Visual:AddToggle("esp_box", {
-    Title = "ESP Box",
-    Description = "Ativa/Desativa ESP Box cor branca",
-    Default = false,
-    Callback = function(state)
-        espAtivado = state
-        if espAtivado then
-            ativarESP()
-        else
-            desativarESP()
-        end
-    end
-})
-
--- Variável para armazenar o estado do ESP
-local espAtivado = false
 local linhas = {} -- Tabela para armazenar as linhas criadas
 local connections = {} -- Tabela para armazenar conexões dos jogadores
 
@@ -458,6 +377,44 @@ Tabs.Visual:AddToggle("esp_linha_rgb", {
             ativarESP()
         else
             desativarESP()
+        end
+    end
+})
+
+-- Variável para armazenar o estado do FOV (ativado ou desativado)
+local fovAtivo = false
+local fovPadrao = 70 -- Define o valor padrão do FOV quando desativado
+local fovAtual = 70   -- Valor inicial do FOV ajustável
+
+-- Criando Slider para ajustar o FOV
+Tabs.Visual:AddSlider("FOV", {
+    Title = "Campo de visão",
+    Description = "Ajusta o campo de visão da câmera",
+    Default = fovAtual,
+    Min = 30,
+    Max = 120, -- Máximo permitido pelo Roblox
+    Rounding = 1,
+
+    Callback = function(value)
+        fovAtual = value
+        if fovAtivo then
+            game.Workspace.CurrentCamera.FieldOfView = fovAtual
+        end
+    end
+})
+
+-- Criando Toggle para ativar/desativar FOV
+Tabs.Visual:AddToggle("FOV_Toggle", {
+    Title = "Campo de visão",
+    Description = "Ativa ou desativa  campo de visão",
+    Default = false,
+
+    Callback = function(state)
+        fovAtivo = state
+        if fovAtivo then
+            game.Workspace.CurrentCamera.FieldOfView = fovAtual -- Aplica o FOV escolhido
+        else
+            game.Workspace.CurrentCamera.FieldOfView = fovPadrao -- Volta ao normal
         end
     end
 })
@@ -599,4 +556,31 @@ Tabs.Settings:AddButton({
                 v.CastShadow = false -- Desativa sombras
             elseif v:IsA("Decal") or v:IsA("Texture") then
                 v.Transparency = 9 -- Oculta texturas e decals
-                
+            elseif v:IsA("ParticleEmitter") or v:IsA("Trail") or v:IsA("Smoke") or v:IsA("Fire") or v:IsA("Explosion") then
+                v:Destroy() -- Remove efeitos que consomem desempenho
+            end
+        end
+
+        -- Ajusta configurações para melhorar o FPS
+        pcall(function()
+            settings().Rendering.QualityLevel = Enum.QualityLevel.Level01 -- Reduz a qualidade gráfica
+            workspace.GlobalShadows = false -- Remove sombras globais
+            
+            if game:FindFirstChild("Lighting") then
+                local lighting = game.Lighting
+                lighting.FogEnd = 9e9 -- Remove neblina
+                lighting.GlobalShadows = false -- Desativa sombras globais
+                lighting.Brightness = 2 -- Ajusta o brilho para compensar a remoção de sombras
+            end
+        end)
+
+        -- Notificação de sucesso (se houver sistema de notificação)
+        if Fluent then
+            Fluent:Notify({
+                Title = "FPS Boost",
+                Content = "Otimização aplicada!",
+                Duration = 3
+            })
+        end
+    end
+})
