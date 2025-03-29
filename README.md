@@ -15,7 +15,7 @@ notify("Executado com Sucesso!", "Seja bem vindo.")
 
 -- Criar a janela principal
 local Window = Fluent:CreateWindow({
-    Title = "Dragon Menu    " .. Fluent.Version,
+    Title = "Dragon Menu  " .. Fluent.Version,
     TabWidth = 90,
     Size = UDim2.fromOffset(370, 300),
     Theme = "Dark"
@@ -86,10 +86,10 @@ local function toggleNoclip(enable)
 end
 
 -- Aba: Início
-Tabs.Main:AddParagraph({ Title = "Programador Victor", Content = "Scripts atualizados" })
+Tabs.Main:AddParagraph({ Title = "Programador Victor", Content = "Scripts personalizados" })
 
 Tabs.Main:AddButton({
-    Title = "Fly v5",
+    Title = "Fly",
     Callback = function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/Vitoarieshub/Fly-universal-/refs/heads/main/README.md"))()
     end
@@ -146,7 +146,7 @@ local espAtivado = false
 local connections = {}
 
 Tabs.Visual:AddToggle("esp_nome_distancia", {
-    Title = "ESP Nome (Atualizado)",
+    Title = "ESP Nome",
     Description = "Ativa/Desativa ESP Nome e Distância",
     Default = false,
     Callback = function(state)
@@ -192,7 +192,7 @@ Tabs.Visual:AddToggle("esp_nome_distancia", {
                     while espAtivado and char and char.Parent and head.Parent and humanoid.Health > 0 do
                         if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") and char:FindFirstChild("HumanoidRootPart") then
                             local distancia = (LocalPlayer.Character.HumanoidRootPart.Position - char.HumanoidRootPart.Position).Magnitude
-                            esp.TextLabel.Text = player.Name .. " [" .. math.floor(distancia) .. "m]"
+                            esp.TextLabel.Text = player.Name .. " - " .. math.floor(distancia) .. "m"
                         end
                         wait(0.1) -- Atualiza a cada 0.1 segundos
                     end
@@ -369,7 +369,7 @@ end
 -- Adiciona a opção de ativar/desativar o ESP
 Tabs.Visual:AddToggle("esp_linha_rgb", {
     Title = "ESP Linha",
-    Description = "Ativa/Desativa ESP linha RGB",
+    Description = "Ativa/Desativa ESP linha",
     Default = false,
     Callback = function(state)
         espAtivado = state
@@ -505,8 +505,8 @@ Tabs.Settings:AddButton({
             -- Criar FPS Label
             local fpsLabel = Instance.new("TextLabel")
             fpsLabel.Size = UDim2.new(0, 80, 0, 25)
-            fpsLabel.Position = UDim2.new(0.5, -50, 0, 5)
-            fpsLabel.BackgroundTransparency = 2 -- Transparente
+            fpsLabel.Position = UDim2.new(1, -290, 0, 1)
+            fpsLabel.BackgroundTransparency = 1 -- Transparente
             fpsLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
             fpsLabel.TextScaled = false
             fpsLabel.TextSize = 14
@@ -515,7 +515,7 @@ Tabs.Settings:AddButton({
             fpsLabel.Parent = screenGui
             fpsLabel.Active = true
             fpsLabel.Draggable = true
-            fpsLabel.TextStrokeTransparency = 0.20
+            fpsLabel.TextStrokeTransparency = 0.6
             fpsLabel.TextStrokeColor3 = Color3.new(0, 0, 0) -- Contorno leve
 
             -- Variáveis para FPS
@@ -555,7 +555,7 @@ Tabs.Settings:AddButton({
                 v.Reflectance = 0 -- Remove reflexos
                 v.CastShadow = false -- Desativa sombras
             elseif v:IsA("Decal") or v:IsA("Texture") then
-                v.Transparency = 9 -- Oculta texturas e decals
+                v.Transparency = 1 -- Oculta texturas e decals
             elseif v:IsA("ParticleEmitter") or v:IsA("Trail") or v:IsA("Smoke") or v:IsA("Fire") or v:IsA("Explosion") then
                 v:Destroy() -- Remove efeitos que consomem desempenho
             end
