@@ -156,7 +156,7 @@ Tabs.Main:AddToggle("velocidade", {
         if state then
             setHumanoidProperty("WalkSpeed", velocidadeValor)
         else
-            setHumanoidProperty("WalkSpeed", 16) -- valor padrão do Roblox
+            setHumanoidProperty("WalkSpeed", 20) -- valor padrão do Roblox
         end
     end
 })
@@ -403,46 +403,6 @@ Tabs.Visual:AddToggle("esp_linha_rgb", {
     end
 })
 
--- Variável para armazenar o estado do FOV (ativado ou desativado)
-local fovAtivo = false
-local fovPadrao = 70 -- Define o valor padrão do FOV quando desativado
-local fovAtual = 70   -- Valor inicial do FOV ajustável
-
--- Criando Slider para ajustar o FOV
-Tabs.Visual:AddSlider("FOV", {
-    Title = "Campo de visão",
-    Description = "Ajusta o campo de visão da câmera",
-    Default = fovAtual,
-    Min = 30,
-    Max = 120, -- Máximo permitido pelo Roblox
-    Rounding = 1,
-
-    Callback = function(value)
-        fovAtual = value
-        if fovAtivo then
-            game.Workspace.CurrentCamera.FieldOfView = fovAtual
-        end
-    end
-})
-
--- Criando Toggle para ativar/desativar FOV
-Tabs.Visual:AddToggle("FOV_Toggle", {
-    Title = "Campo de visão",
-    Description = "Ativa ou desativa  campo de visão",
-    Default = false,
-
-    Callback = function(state)
-        fovAtivo = state
-        if fovAtivo then
-            game.Workspace.CurrentCamera.FieldOfView = fovAtual -- Aplica o FOV escolhido
-        else
-            game.Workspace.CurrentCamera.FieldOfView = fovPadrao -- Volta ao normal
-        end
-    end
-})
-
-Tabs.Players:AddParagraph({ Title = " Clientes do Dragon menu", Content = "@KokbobDEV"})
-
 Tabs.Players:AddButton({
     Title = "Teleporte",
     Callback = function()
@@ -590,4 +550,21 @@ Tabs.Settings:AddButton({
             settings().Rendering.QualityLevel = Enum.QualityLevel.Level01 -- Reduz a qualidade gráfica
             workspace.GlobalShadows = false -- Remove sombras globais
             
-     
+            if game:FindFirstChild("Lighting") then
+                local lighting = game.Lighting
+                lighting.FogEnd = 9e9 -- Remove neblina
+                lighting.GlobalShadows = false -- Desativa sombras globais
+                lighting.Brightness = 2 -- Ajusta o brilho para compensar a remoção de sombras
+            end
+        end)
+
+        -- Notificação de sucesso (se houver sistema de notificação)
+        if Fluent then
+            Fluent:Notify({
+                Title = "FPS Boost",
+                Content = "Otimização aplicada!",
+                Duration = 3
+            })
+        end
+    end
+})
