@@ -15,7 +15,7 @@ notify("Executado com Sucesso!", "Seja bem vindo.")
 
 -- Criar a janela principal
 local Window = Fluent:CreateWindow({
-    Title = "Dragon Menu    " .. Fluent.Version,
+    Title = "Dragon Menu  " .. Fluent.Version,
     TabWidth = 90,
     Size = UDim2.fromOffset(370, 300),
     Theme = "Dark"
@@ -127,6 +127,10 @@ Tabs.Main:AddSlider("JumpPower", {
     end
 })
 
+local velocidadeAtiva = false
+local velocidadeValor = 20 -- valor padrão
+
+-- Slider para ajustar o valor da velocidade
 Tabs.Main:AddSlider("WalkSpeed", {
     Title = "Velocidade",
     Description = "Define a velocidade do jogador",
@@ -135,7 +139,25 @@ Tabs.Main:AddSlider("WalkSpeed", {
     Max = 200,
     Rounding = 1,
     Callback = function(value)
-        setHumanoidProperty("WalkSpeed", value)
+        velocidadeValor = value
+        if velocidadeAtiva then
+            setHumanoidProperty("WalkSpeed", velocidadeValor)
+        end
+    end
+})
+
+-- Toggle para ativar/desativar a velocidade
+Tabs.Main:AddToggle("velocidade", {
+    Title = "Velocidade",
+    Description = "Ativa/desativa a velocidade",
+    Default = false,
+    Callback = function(state)
+        velocidadeAtiva = state
+        if state then
+            setHumanoidProperty("WalkSpeed", velocidadeValor)
+        else
+            setHumanoidProperty("WalkSpeed", 16) -- valor padrão do Roblox
+        end
     end
 })
 
@@ -146,7 +168,7 @@ local espAtivado = false
 local connections = {}
 
 Tabs.Visual:AddToggle("esp_nome_distancia", {
-    Title = "ESP Nome (Atualizado)",
+    Title = "ESP Nome",
     Description = "Ativa/Desativa ESP Nome e Distância",
     Default = false,
     Callback = function(state)
@@ -507,11 +529,11 @@ Tabs.Settings:AddButton({
             -- Criar FPS Label
             local fpsLabel = Instance.new("TextLabel")
             fpsLabel.Size = UDim2.new(0, 80, 0, 25)
-            fpsLabel.Position = UDim2.new(0.5, -50, 0, 5)
-            fpsLabel.BackgroundTransparency = 2 -- Transparente
+            fpsLabel.Position = UDim2.new(0.7, -10, 0, 9)
+            fpsLabel.BackgroundTransparency = 10 -- Transparente
             fpsLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
             fpsLabel.TextScaled = false
-            fpsLabel.TextSize = 14
+            fpsLabel.TextSize = 15
             fpsLabel.Font = Enum.Font.Code
             fpsLabel.Text = "FPS: 0"
             fpsLabel.Parent = screenGui
@@ -568,21 +590,4 @@ Tabs.Settings:AddButton({
             settings().Rendering.QualityLevel = Enum.QualityLevel.Level01 -- Reduz a qualidade gráfica
             workspace.GlobalShadows = false -- Remove sombras globais
             
-            if game:FindFirstChild("Lighting") then
-                local lighting = game.Lighting
-                lighting.FogEnd = 9e9 -- Remove neblina
-                lighting.GlobalShadows = false -- Desativa sombras globais
-                lighting.Brightness = 2 -- Ajusta o brilho para compensar a remoção de sombras
-            end
-        end)
-
-        -- Notificação de sucesso (se houver sistema de notificação)
-        if Fluent then
-            Fluent:Notify({
-                Title = "FPS Boost",
-                Content = "Otimização aplicada!",
-                Duration = 3
-            })
-        end
-    end
-})
+     
