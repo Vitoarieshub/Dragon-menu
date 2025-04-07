@@ -15,7 +15,7 @@ notify("Executado com Sucesso!", "Seja bem vindo.")
 
 -- Criar a janela principal
 local Window = Fluent:CreateWindow({
-    Title = "Dragon Menu  " .. Fluent.Version,
+    Title = "Dragon Menu   " .. Fluent.Version,
     TabWidth = 90,
     Size = UDim2.fromOffset(370, 300),
     Theme = "Dark"
@@ -89,7 +89,7 @@ end
 Tabs.Main:AddParagraph({ Title = "Programador Victor", Content = "Scripts atualizados" })
 
 Tabs.Main:AddButton({
-    Title = "Fly",
+    Title = "Fly v5",
     Callback = function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/Vitoarieshub/Fly-universal-/refs/heads/main/README.md"))()
     end
@@ -399,6 +399,19 @@ Tabs.Visual:AddToggle("esp_linha_rgb", {
             ativarESP()
         else
             desativarESP()
+        end
+    end
+})
+
+Tabs.Visual:AddToggle("campo", {
+    Title = "Campo de visão",
+    Description = "Ativa/desativa ó campo de visão",
+    Default = false,
+    Callback = function(value)
+        if value then
+            game.Workspace.CurrentCamera.FieldOfView = 150 -- ou qualquer valor aumentado
+        else
+            game.Workspace.CurrentCamera.FieldOfView = 70 -- valor padrão
         end
     end
 })
