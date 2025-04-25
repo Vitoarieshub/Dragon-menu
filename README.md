@@ -15,7 +15,7 @@ notify("Executado com Sucesso!", "Seja bem vindo.")
 
 -- Criar a janela principal
 local Window = Fluent:CreateWindow({
-    Title = "Dragon Menu   " .. Fluent.Version,
+    Title = "Dragon Menu - Legit   " .. Fluent.Version,
     TabWidth = 90,
     Size = UDim2.fromOffset(370, 300),
     Theme = "Dark"
@@ -26,7 +26,6 @@ local Tabs = {
     Main = Window:AddTab({ Title = "Ínício" }),
     Visual = Window:AddTab({ Title = "Visual" }),
     Players = Window:AddTab({ Title = "Jogadores" }),
-    Exploits = Window:AddTab({ Title = "Exploits" }),
     Settings = Window:AddTab({ Title = "Configuração" })
 }
 
@@ -287,100 +286,97 @@ Tabs.Visual:AddToggle("esp_nome_distancia", {
 local espAtivado = false
 local linhas = {} -- Tabela para armazenar as linhas criadas
 local connections = {} -- Tabela para armazenar conexões dos jogadores
+local corVermelha = Color3.fromRGB(255, 0, 0)
 
--- Função para gerar uma cor RGB animada
-local function gerarCorRGB()
-    local r = math.sin(tick()) * 127 + 128
-    local g = math.sin(tick() + 2) * 127 + 128
-    local b = math.sin(tick() + 4) * 127 + 128
-    return Color3.fromRGB(r, g, b)
-end
-
--- Função para criar uma linha ESP para um jogador
+-- Função para criar e atualizar a linha ESP
 local function criarLinha(player)
     if player == game.Players.LocalPlayer then return end
 
-    local function atualizarLinha()
+    -- Remove linha e conexão antiga, se existir
+    if linhas[player] then
+        linhas[player]:Remove()
+        linhas[player] = nil
+    end
+    if connections[player] then
+        connections[player]:Disconnect()
+        connections[player] = nil
+    end
+
+    local linha = Drawing.new("Line")
+    linha.Thickness = 2
+    linha.Transparency = 1
+    linha.Visible = false
+    linha.Color = corVermelha
+    linhas[player] = linha
+
+    -- Atualizar a linha a cada frame
+    connections[player] = game:GetService("RunService").RenderStepped:Connect(function()
         local character = player.Character
-        if not character then return end
-
-        local head = character:FindFirstChild("Head")
-        if not head then return end
-
-        -- Criar nova linha se ainda não existir
-        local linha = linhas[player]
-        if not linha then
-            linha = Drawing.new("Line")
-            linha.Thickness = 2
-            linha.Transparency = 1
+        if not character then
             linha.Visible = false
-            linhas[player] = linha
+            return
         end
 
-        -- Atualizar posição e cor da linha constantemente
-        local connection
-        connection = game:GetService("RunService").RenderStepped:Connect(function()
-            if not espAtivado or not character.Parent or not head.Parent then
-                linha.Visible = false
-                return
-            end
+        local head = character:FindFirstChild("Head")
+        if not head or not head:IsA("BasePart") then
+            linha.Visible = false
+            return
+        end
 
-            local camera = game.Workspace.CurrentCamera
-            local screenSize = camera.ViewportSize
-            local headPosition, onScreen = camera:WorldToViewportPoint(head.Position)
+        if not espAtivado then
+            linha.Visible = false
+            return
+        end
 
-            if onScreen then
-                linha.From = Vector2.new(screenSize.X / 2, 0) -- Linha saindo do topo da tela (centro)
-                linha.To = Vector2.new(headPosition.X, headPosition.Y) -- Até a cabeça do jogador
-                linha.Color = gerarCorRGB() -- Atualiza a cor constantemente
-                linha.Visible = true
-            else
-                linha.Visible = false
-            end
-        end)
+        local camera = workspace.CurrentCamera
+        local screenSize = camera.ViewportSize
+        local headPosition, onScreen = camera:WorldToViewportPoint(head.Position)
 
-        -- Salvar conexão para remover depois
-        connections[player] = connection
-    end
-
-    -- Monitorar renascimento do jogador
-    if connections[player] then
-        connections[player]:Disconnect() -- Desconectar qualquer conexão antiga
-    end
-
-    connections[player] = player.CharacterAdded:Connect(function()
-        wait(0.5) -- Pequeno delay para evitar erros
-        if espAtivado then
-            criarLinha(player) -- Recria a linha quando o jogador renasce
+        if onScreen then
+            linha.From = Vector2.new(screenSize.X / 2, 0)
+            linha.To = Vector2.new(headPosition.X, headPosition.Y)
+            linha.Visible = true
+        else
+            linha.Visible = false
         end
     end)
 
-    atualizarLinha() -- Criar linha imediatamente
+    -- Atualiza a linha sempre que o Character mudar
+    player.CharacterAdded:Connect(function()
+        wait(0.5)
+        if espAtivado then
+            criarLinha(player)
+        end
+    end)
 end
 
--- Ativar ESP para todos os jogadores
+-- Ativa o ESP para todos os jogadores
 local function ativarESP()
     for _, player in pairs(game.Players:GetPlayers()) do
         criarLinha(player)
     end
 
-    -- Monitorar novos jogadores entrando no jogo
     connections["PlayerAdded"] = game.Players.PlayerAdded:Connect(function(player)
+        player.CharacterAdded:Connect(function()
+            wait(0.5)
+            if espAtivado then
+                criarLinha(player)
+            end
+        end)
         criarLinha(player)
     end)
 end
 
--- Desativar ESP e remover todas as linhas
+-- Desativa o ESP e limpa tudo
 local function desativarESP()
     for _, linha in pairs(linhas) do
         if linha then
             linha:Remove()
         end
     end
-    linhas = {} -- Limpa a tabela de linhas
+    linhas = {}
 
-    -- Desconectar todas as conexões para evitar vazamento de memória
-    for player, connection in pairs(connections) do
+    for _, connection in pairs(connections) do
         if connection then
             connection:Disconnect()
         end
@@ -388,10 +384,10 @@ local function desativarESP()
     connections = {}
 end
 
--- Adiciona a opção de ativar/desativar o ESP
+-- Toggle para ativar/desativar o ESP
 Tabs.Visual:AddToggle("esp_linha_rgb", {
     Title = "ESP Linha",
-    Description = "Ativa/Desativa ESP linha RGB",
+    Description = "Ativa/Desativa ESP linha vermelha",
     Default = false,
     Callback = function(state)
         espAtivado = state
@@ -427,20 +423,6 @@ Tabs.Players:AddButton({
     Title = "Assistir jogador",
     Callback = function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/Vitoarieshub/assistir-jogador-/refs/heads/main/README.md"))()
-    end
-})
-
-Tabs.Exploits:AddButton({
-    Title = "Fly car",
-    Callback = function()
-        loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Android-vfly-24974"))()
-    end
-})
-
-Tabs.Exploits:AddButton({
-    Title = "Grudar portas",
-    Callback = function()
-        loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Bring-Parts-27586"))()
     end
 })
 
