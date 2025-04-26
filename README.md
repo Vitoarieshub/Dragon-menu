@@ -15,7 +15,7 @@ notify("Executado com Sucesso!", "Seja bem vindo.")
 
 -- Criar a janela principal
 local Window = Fluent:CreateWindow({
-    Title = "Dragon Menu - Legit   " .. Fluent.Version,
+    Title = "Dragon Menu   " .. Fluent.Version,
     TabWidth = 90,
     Size = UDim2.fromOffset(370, 300),
     Theme = "Dark"
@@ -167,7 +167,7 @@ local espAtivado = false
 local connections = {}
 
 Tabs.Visual:AddToggle("esp_nome_distancia", {
-    Title = "ESP Nome",
+    Title = "ESP Nome (Aualizado)",
     Description = "Ativa/Desativa ESP Nome e Distância",
     Default = false,
     Callback = function(state)
@@ -178,102 +178,98 @@ Tabs.Visual:AddToggle("esp_nome_distancia", {
         -- Função para criar ESP
         local function criarESP(player)
             if player == LocalPlayer then return end
-            if not espAtivado then return end -- Impede a criação se o ESP estiver desligado
+            if not espAtivado then return end
 
-            local char = player.Character or player.CharacterAdded:Wait()
-            local head = char:FindFirstChild("Head", 5)
-            local humanoid = char:FindFirstChild("Humanoid")
+            -- Atualização contínua
+            task.spawn(function()
+                while espAtivado do
+                    local char = player.Character
+                    local head = char and char:FindFirstChild("Head")
+                    local humanoid = char and char:FindFirstChild("Humanoid")
 
-            if head and humanoid then
-                local esp = head:FindFirstChild("ESP")
-                if not esp then
-                    esp = Instance.new("BillboardGui")
-                    esp.Name = "ESP"
-                    esp.Adornee = head
-                    esp.Size = UDim2.new(0, 150, 0, 50) -- Ajusta o tamanho para incluir nome e distância
-                    esp.StudsOffset = Vector3.new(0, 2, 0)
-                    esp.AlwaysOnTop = true
+                    if char and head and humanoid and humanoid.Health > 0 then
+                        local esp = head:FindFirstChild("ESP")
+                        if not esp then
+                            esp = Instance.new("BillboardGui")
+                            esp.Name = "ESP"
+                            esp.Adornee = head
+                            esp.Size = UDim2.new(0, 150, 0, 50)
+                            esp.StudsOffset = Vector3.new(0, 2, 0)
+                            esp.AlwaysOnTop = true
 
-                    local text = Instance.new("TextLabel")
-                    text.Size = UDim2.new(1, 0, 1, 0)
-                    text.BackgroundTransparency = 1
-                    text.TextColor3 = Color3.fromRGB(255, 255, 255) -- Cor branca
-                    text.TextSize = 14 -- Tamanho da fonte
-                    text.TextScaled = false -- Não usa escala automática
-                    text.Font = Enum.Font.GothamBold
-                    text.TextStrokeTransparency = 0.4
-                    text.TextStrokeColor3 = Color3.new(0, 0, 0)
-                    text.Parent = esp
+                            local text = Instance.new("TextLabel")
+                            text.Name = "Texto"
+                            text.Size = UDim2.new(1, 0, 1, 0)
+                            text.BackgroundTransparency = 1
+                            text.TextColor3 = Color3.fromRGB(255, 255, 255) -- Cor branca
+                            text.TextSize = 14
+                            text.TextScaled = false
+                            text.Font = Enum.Font.GothamBold
+                            text.TextStrokeTransparency = 0.4
+                            text.TextStrokeColor3 = Color3.new(0, 0, 0)
+                            text.Parent = esp
 
-                    esp.Parent = head
-                end
+                            esp.Parent = head
 
-                -- Atualiza o texto para incluir o nome e a distância
-                local function atualizarTexto()
-                    while espAtivado and char and char.Parent and head.Parent and humanoid.Health > 0 do
-                        if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") and char:FindFirstChild("HumanoidRootPart") then
-                            local distancia = (LocalPlayer.Character.HumanoidRootPart.Position - char.HumanoidRootPart.Position).Magnitude
-                            esp.TextLabel.Text = player.Name .. " [" .. math.floor(distancia) .. "m]"
+                            humanoid.Died:Connect(function()
+                                if esp then esp:Destroy() end
+                            end)
                         end
-                        wait(0.1) -- Atualiza a cada 0.1 segundos
-                    end
 
-                    -- Remove o ESP quando o personagem morre
-                    if esp then
-                        esp:Destroy()
+                        local texto = esp:FindFirstChild("Texto")
+                        if texto and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") and char:FindFirstChild("HumanoidRootPart") then
+                            local distancia = (LocalPlayer.Character.HumanoidRootPart.Position - char.HumanoidRootPart.Position).Magnitude
+                            texto.Text = player.Name .. " [" .. math.floor(distancia) .. "m]"
+                        end
                     end
+                    wait(0.3)
                 end
-
-                -- Inicia a atualização do texto
-                task.spawn(atualizarTexto)
-
-                -- Adiciona um evento para remover o ESP quando o jogador morre
-                humanoid.Died:Connect(function()
-                    if esp then
-                        esp:Destroy()
-                    end
-                end)
-            end
+            end)
         end
 
-        -- Função para monitorar renascimentos e atualizar ESP automaticamente
-        local function monitorarPersonagem(player)
-            if espAtivado then
-                if connections[player] then
-                    connections[player]:Disconnect() -- Desconectar conexão antiga
-                end
-
-                connections[player] = player.CharacterAdded:Connect(function(char)
-                    wait(1) -- Espera o personagem carregar
-                    if espAtivado then
-                        criarESP(player)
-                    end
-                end)
+        -- Função para monitorar respawns e mudanças
+        local function monitorarPlayer(player)
+            if connections[player] then
+                connections[player]:Disconnect()
             end
+
+            connections[player] = player.CharacterAdded:Connect(function()
+                wait(1)
+                if espAtivado then
+                    criarESP(player)
+                end
+            end)
+
+            criarESP(player)
         end
 
-        -- Ativar ESP para todos os jogadores
         if espAtivado then
             for _, player in ipairs(Players:GetPlayers()) do
-                criarESP(player)
-                monitorarPersonagem(player)
+                monitorarPlayer(player)
             end
 
-            -- Criar ESP para novos jogadores somente quando o ESP estiver ligado
             connections["PlayerAdded"] = Players.PlayerAdded:Connect(function(player)
-                monitorarPersonagem(player)
-                criarESP(player)
+                monitorarPlayer(player)
             end)
         else
-            -- Desativar ESP completamente
+            -- Desativar ESP
             for _, player in ipairs(Players:GetPlayers()) do
+                local char = player.Character
+                if char then
+                    local head = char:FindFirstChild("Head")
+                    if head then
+                        local esp = head:FindFirstChild("ESP")
+                        if esp then
+                            esp:Destroy()
+                        end
+                    end
+                end
                 if connections[player] then
                     connections[player]:Disconnect()
                     connections[player] = nil
                 end
             end
 
-            -- Desconectar evento de novos jogadores quando o ESP estiver desligado
             if connections["PlayerAdded"] then
                 connections["PlayerAdded"]:Disconnect()
                 connections["PlayerAdded"] = nil
@@ -386,7 +382,7 @@ end
 
 -- Toggle para ativar/desativar o ESP
 Tabs.Visual:AddToggle("esp_linha_rgb", {
-    Title = "ESP Linha",
+    Title = "ESP Linha (Atualizado)",
     Description = "Ativa/Desativa ESP linha vermelha",
     Default = false,
     Callback = function(state)
