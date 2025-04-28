@@ -522,23 +522,10 @@ end
 
 -- Criar Toggle usando seu sistema
 Tabs.Visual:AddToggle("espskeleton", {
-    Title = "ESP Skeleton",
-    Description = "Ativa/desativa Skeleton ESP nos players",
+    Title = "ESP Esqueleto (Teste)",
+    Description = "Ativa/desativa Esp esqueleto ",
     Default = false,
     Callback = toggleSkeleton
-})
-
-Tabs.Visual:AddToggle("campo", {
-    Title = "Campo de visão",
-    Description = "Ativa/desativa ó campo de visão",
-    Default = false,
-    Callback = function(value)
-        if value then
-            game.Workspace.CurrentCamera.FieldOfView = 150 -- ou qualquer valor aumentado
-        else
-            game.Workspace.CurrentCamera.FieldOfView = 70 -- valor padrão
-        end
-    end
 })
 
 Tabs.Players:AddButton({
@@ -628,4 +615,13 @@ Tabs.Settings:AddButton({
 
             -- Variáveis para FPS
             local lastTime = tick()
-            local
+            local frameCount = 0
+
+            -- Atualiza o FPS a cada segundo
+            RunService.RenderStepped:Connect(function()
+                frameCount = frameCount + 1
+                local currentTime = tick()
+                if currentTime - lastTime >= 1 then
+                    fpsLabel.Text = "FPS: " .. frameCount
+                    frameCount = 0
+                    lastTime = currentTime
