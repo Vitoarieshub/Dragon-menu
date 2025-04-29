@@ -395,6 +395,7 @@ Tabs.Visual:AddToggle("esp_linha_rgb", {
     end
 })
 
+
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 
@@ -521,9 +522,9 @@ local function toggleSkeleton(Value)
 end
 
 -- Criar Toggle usando seu sistema
-Tabs.Visual:AddToggle("espskeleton", {
-    Title = "ESP Esqueleto (Teste)",
-    Description = "Ativa/desativa Esp esqueleto ",
+Tabs.Main:AddToggle("espskeleton", {
+    Title = "ESP Skeleton",
+    Description = "Ativa/desativa Skeleton ESP nos players",
     Default = false,
     Callback = toggleSkeleton
 })
