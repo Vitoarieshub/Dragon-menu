@@ -15,7 +15,7 @@ notify("Executado com Sucesso!", "Seja bem vindo.")
 
 -- Criar a janela principal
 local Window = Fluent:CreateWindow({
-    Title = "Dragon Menu   " .. Fluent.Version,
+    Title = "Dragon Menu | Universal legít  " .. Fluent.Version,
     TabWidth = 90,
     Size = UDim2.fromOffset(370, 300),
     Theme = "Dark"
@@ -85,10 +85,10 @@ local function toggleNoclip(enable)
 end
 
 -- Aba: Início
-Tabs.Main:AddParagraph({ Title = "Programador Victor", Content = "Scripts atualizados" })
+Tabs.Main:AddParagraph({ Title = "Programador Victor", Content = "Scripts personalizados" })
 
 Tabs.Main:AddButton({
-    Title = "Fly v5",
+    Title = "Fly",
     Callback = function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/Vitoarieshub/Fly-universal-/refs/heads/main/README.md"))()
     end
@@ -395,21 +395,43 @@ Tabs.Visual:AddToggle("esp_linha_rgb", {
     end
 })
 
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+local camera = workspace.CurrentCamera
+local savedFOV = 70 -- Valor padrão do FOV
+
+-- Função para aplicar o FOV salvo
+local function applySavedFOV()
+    camera.FieldOfView = savedFOV
+end
+
+-- Aplicar o FOV salvo ao iniciar
+applySavedFOV()
+
+-- Aplicar o FOV salvo sempre que o personagem for adicionado
+player.CharacterAdded:Connect(function()
+    -- Esperar um pequeno intervalo para garantir que o personagem esteja totalmente carregado
+    wait(0.1)
+    applySavedFOV()
+end)
+
+-- Toggle para ativar/desativar o campo de visão
 Tabs.Visual:AddToggle("campo", {
     Title = "Campo de visão",
-    Description = "Ativa/desativa ó campo de visão",
+    Description = "Ativa/desativa o campo de visão",
     Default = false,
     Callback = function(value)
         if value then
-            game.Workspace.CurrentCamera.FieldOfView = 150 -- ou qualquer valor aumentado
+            savedFOV = 150 -- ou qualquer valor aumentado
         else
-            game.Workspace.CurrentCamera.FieldOfView = 70 -- valor padrão
+            savedFOV = 70 -- valor padrão
         end
+        applySavedFOV()
     end
 })
 
 Tabs.Players:AddButton({
-    Title = "Teleporte",
+    Title = "Teleporte (anti ban)",
     Callback = function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/Vitoarieshub/Teleporte-/refs/heads/main/README.md"))()
     end
@@ -480,17 +502,17 @@ Tabs.Settings:AddButton({
             -- Criar FPS Label
             local fpsLabel = Instance.new("TextLabel")
             fpsLabel.Size = UDim2.new(0, 80, 0, 25)
-            fpsLabel.Position = UDim2.new(0.7, -10, 0, 9)
-            fpsLabel.BackgroundTransparency = 10 -- Transparente
+            fpsLabel.Position = UDim2.new(1, -290, 0, 1)
+            fpsLabel.BackgroundTransparency = 1 -- Transparente
             fpsLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
             fpsLabel.TextScaled = false
-            fpsLabel.TextSize = 15
+            fpsLabel.TextSize = 14
             fpsLabel.Font = Enum.Font.Code
             fpsLabel.Text = "FPS: 0"
             fpsLabel.Parent = screenGui
             fpsLabel.Active = true
             fpsLabel.Draggable = true
-            fpsLabel.TextStrokeTransparency = 0.20
+            fpsLabel.TextStrokeTransparency = 0.6
             fpsLabel.TextStrokeColor3 = Color3.new(0, 0, 0) -- Contorno leve
 
             -- Variáveis para FPS
@@ -530,7 +552,7 @@ Tabs.Settings:AddButton({
                 v.Reflectance = 0 -- Remove reflexos
                 v.CastShadow = false -- Desativa sombras
             elseif v:IsA("Decal") or v:IsA("Texture") then
-                v.Transparency = 9 -- Oculta texturas e decals
+                v.Transparency = 1 -- Oculta texturas e decals
             elseif v:IsA("ParticleEmitter") or v:IsA("Trail") or v:IsA("Smoke") or v:IsA("Fire") or v:IsA("Explosion") then
                 v:Destroy() -- Remove efeitos que consomem desempenho
             end
