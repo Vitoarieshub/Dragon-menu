@@ -15,7 +15,7 @@ notify("Executado com Sucesso!", "Seja bem vindo.")
 
 -- Criar a janela principal
 local Window = Fluent:CreateWindow({
-    Title = "Dragon Menu | Universal legít  " .. Fluent.Version,
+    Title = "Dragon Menu | Universal   " .. Fluent.Version,
     TabWidth = 90,
     Size = UDim2.fromOffset(370, 300),
     Theme = "Dark"
@@ -114,33 +114,54 @@ Tabs.Main:AddToggle("infjump", {
     end
 })
 
-Tabs.Main:AddSlider("JumpPower", {
-    Title = "Altura do pulo",
-    Description = "Define a altura do pulo",
-    Default = 50,
-    Min = 0,
-    Max = 900,
-    Rounding = 1,
-    Callback = function(value)
-        setHumanoidProperty("JumpPower", value)
+local jumpAtivo = false
+local jumpValor = 50
+
+Tabs.Main:AddInput("JumpPowerManual", {
+    Title = "Altura do Pulo (manual)",
+    Placeholder = "Digite a altura...",
+    Numeric = true,
+    Finished = true, -- aplica ao sair da caixa
+    Callback = function(inputValue)
+        local value = tonumber(inputValue)
+        if value and value >= 0 and value <= 900 then
+            jumpValor = value
+            if jumpAtivo then
+                setHumanoidProperty("JumpPower", jumpValor)
+            end
+        end
+    end
+})
+
+Tabs.Main:AddToggle("JumpPowerToggle", {
+    Title = "Ativar pulo personalizado",
+    Description = "Ativa/desativa altura do pulo",
+    Default = false,
+    Callback = function(state)
+        jumpAtivo = state
+        if state then
+            setHumanoidProperty("JumpPower", jumpValor)
+        else
+            setHumanoidProperty("JumpPower", 50) -- valor padrão
+        end
     end
 })
 
 local velocidadeAtiva = false
 local velocidadeValor = 20 -- valor padrão
 
--- Slider para ajustar o valor da velocidade
-Tabs.Main:AddSlider("WalkSpeed", {
+Tabs.Main:AddInput("WalkSpeedManual", {
     Title = "Velocidade",
-    Description = "Define a velocidade do jogador",
-    Default = 20,
-    Min = 0,
-    Max = 200,
-    Rounding = 1,
-    Callback = function(value)
-        velocidadeValor = value
-        if velocidadeAtiva then
-            setHumanoidProperty("WalkSpeed", velocidadeValor)
+    Placeholder = "Digite a velocidade...",
+    Numeric = true,
+    Finished = true, -- aplica ao sair da caixa
+    Callback = function(inputValue)
+        local value = tonumber(inputValue)
+        if value and value >= 0 and value <= 200 then
+            velocidadeValor = value
+            if velocidadeAtiva then
+                setHumanoidProperty("WalkSpeed", velocidadeValor)
+            end
         end
     end
 })
@@ -167,7 +188,7 @@ local espAtivado = false
 local connections = {}
 
 Tabs.Visual:AddToggle("esp_nome_distancia", {
-    Title = "ESP Nome (Aualizado)",
+    Title = "ESP Nome",
     Description = "Ativa/Desativa ESP Nome e Distância",
     Default = false,
     Callback = function(state)
@@ -219,7 +240,7 @@ Tabs.Visual:AddToggle("esp_nome_distancia", {
                         local texto = esp:FindFirstChild("Texto")
                         if texto and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") and char:FindFirstChild("HumanoidRootPart") then
                             local distancia = (LocalPlayer.Character.HumanoidRootPart.Position - char.HumanoidRootPart.Position).Magnitude
-                            texto.Text = player.Name .. " [" .. math.floor(distancia) .. "m]"
+                            texto.Text = player.Name .. " - " .. math.floor(distancia) .. "m"
                         end
                     end
                     wait(0.3)
@@ -382,7 +403,7 @@ end
 
 -- Toggle para ativar/desativar o ESP
 Tabs.Visual:AddToggle("esp_linha_rgb", {
-    Title = "ESP Linha (Atualizado)",
+    Title = "ESP Linha",
     Description = "Ativa/Desativa ESP linha vermelha",
     Default = false,
     Callback = function(state)
@@ -431,7 +452,7 @@ Tabs.Visual:AddToggle("campo", {
 })
 
 Tabs.Players:AddButton({
-    Title = "Teleporte (anti ban)",
+    Title = "Teleporte",
     Callback = function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/Vitoarieshub/Teleporte-/refs/heads/main/README.md"))()
     end
