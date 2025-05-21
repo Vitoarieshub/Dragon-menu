@@ -602,3 +602,10 @@ Tabs.Settings:AddButton({
         end
     end
 })
+
+Tabs.Settings:AddButton({
+    Title = "Auto Report",
+    Callback = function()
+        loadstring(game:HttpGet('https://raw.githubusercontent.com/CF-Trail/Auto-Report/main/revamp.lua'))()
+    end
+})
