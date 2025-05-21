@@ -499,53 +499,12 @@ Tabs.Settings:AddToggle("notificacao", {
     end
 })
 
-local player = game:GetService("Players").LocalPlayer
-local StarterGui = game:GetService("StarterGui")
-
-local notificacaoAtivada = false
-
-Tabs.Settings:AddToggle("notificacao", {
-    Title = "Anti Kick",
-    Description = "Ativar/desativar Anti-Kick",
-    Default = false,
-    Callback = function(state)
-        notificacaoAtivada = state
-
-        if state then
-            StarterGui:SetCore("SendNotification", {
-                Title = "Anti-Kick Ativado",
-                Text = "by Vitor.",
-                Duration = 5
-            })
-        else
-            StarterGui:SetCore("SendNotification", {
-                Title = "Anti-Kick Desativado",
-                Text = "Você está vulnerável a kicks.",
-                Duration = 5
-            })
-        end
+Tabs.Settings:AddButton({
+    Title = "Auto Report",
+    Callback = function()
+        loadstring(game:HttpGet('https://raw.githubusercontent.com/CF-Trail/Auto-Report/main/revamp.lua'))()
     end
 })
-
-local old
-
-old = hookmetamethod(game, "__namecall", function(self, ...)
-    local method = getnamecallmethod()
-
-    if notificacaoAtivada and not checkcaller() and (method == "Kick" or method == "kick") then
-        warn("Blocked Kick attempt.")
-
-        StarterGui:SetCore("SendNotification", {
-            Title = "Tentativa de Kick Bloqueada",
-            Text = "Protegido pelo Anti-Kick.",
-            Duration = 5
-        })
-
-        return nil
-    end
-
-    return old(self, ...)
-end)
 
 Tabs.Settings:AddButton({
     Title = "FPS",
@@ -624,4 +583,29 @@ Tabs.Settings:AddButton({
                 v.Transparency = 1 -- Oculta texturas e decals
             elseif v:IsA("ParticleEmitter") or v:IsA("Trail") or v:IsA("Smoke") or v:IsA("Fire") or v:IsA("Explosion") then
                 v:Destroy() -- Remove efeitos que consomem desempenho
-     
+            end
+        end
+
+        -- Ajusta configurações para melhorar o FPS
+        pcall(function()
+            settings().Rendering.QualityLevel = Enum.QualityLevel.Level01 -- Reduz a qualidade gráfica
+            workspace.GlobalShadows = false -- Remove sombras globais
+            
+            if game:FindFirstChild("Lighting") then
+                local lighting = game.Lighting
+                lighting.FogEnd = 9e9 -- Remove neblina
+                lighting.GlobalShadows = false -- Desativa sombras globais
+                lighting.Brightness = 2 -- Ajusta o brilho para compensar a remoção de sombras
+            end
+        end)
+
+        -- Notificação de sucesso (se houver sistema de notificação)
+        if Fluent then
+            Fluent:Notify({
+                Title = "FPS Boost",
+                Content = "Otimização aplicada!",
+                Duration = 3
+            })
+        end
+    end
+})
