@@ -7,21 +7,6 @@ MakeWindow({
         Animation = "by : Vito0296poq"
     },
    
-    Key = {
-        KeySystem = false, -- Ativa o sistema de Key
-        Title = "Sistema de Chave",
-        Description = "Digite a chave correta para continuar.",
-        KeyLink = "https://seusite.com/chave", -- Link para obter a chave (opcional)
-        Keys = {"1234", "chave-extra"}, -- Chaves válidas
-        Notifi = {
-            Notifications = true,
-            CorrectKey = "Chave correta! Iniciando script...",
-            Incorrectkey = "Chave incorreta, tente novamente.",
-            CopyKeyLink = "Link copiado!"
-        }
-    }
-})
-
 -- Botão de minimizar
 MinimizeButton({
     Image = "rbxassetid://1234567890",
@@ -687,4 +672,12 @@ AddButton(Settings, {
 
             -- Notificação (opcional, remova se não quiser)
             if typeof(Fluent) == "table" and Fluent.Notify then
-          
+                Fluent:Notify({
+                    Title = "FPS Boost",
+                    Content = "Otimização aplicada!",
+                    Duration = 3
+                })
+            end
+        end)
+    end
+})
