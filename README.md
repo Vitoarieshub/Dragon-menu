@@ -45,11 +45,13 @@ local Settings = MakeTab({Name = "Configuração"})
 --     Time = 5
 -- })
 
-Main:CreateButton({
+AddButton(Main, {
     Name = "Fly GUI v4",
     Callback = function()
         print("Botão foi clicado!")
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/Vitoarieshub/Fly-Gui-v4/refs/heads/main/README.md"))()
+        pcall(function()
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/Vitoarieshub/Fly-Gui-v4/main/FlyGuiV4.lua"))()
+        end)
     end
 })
 
