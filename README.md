@@ -48,14 +48,9 @@ local Settings = MakeTab({Name = "Configuração"})
 AddButton(Main, {
     Name = "Fly GUI v4",
     Callback = function()
-        print("Botão clicado")
-        local sucesso, erro = pcall(function()
-            loadstring(game:HttpGet("https://raw.githubusercontent.com/Vitoarieshub/Fly-Gui-v4/refs/heads/main/README.md"))()
+        pcall(function()
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/Vitoarieshub/Fly-Gui-v4/main/FlyGuiV4.lua"))()
         end)
-
-        if not sucesso then
-            warn("Erro ao carregar script: " .. tostring(erro))
-        end
     end
 })
 
@@ -130,22 +125,7 @@ local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 
 local velocidadeAtivada = false
-local velocidadeSelecionada = 25 -- valor padrão
-
--- Função para aplicar velocidade
-local function aplicarVelocidade()
-    if not LocalPlayer.Character then return end
-    local humanoid = LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
-    if humanoid then
-        humanoid.WalkSpeed = velocidadeAtivada and velocidadeSelecionada or 16 -- 16 é o valor padrão
-    end
-end
-
--- Atualiza velocidade quando personagem aparecer
-LocalPlayer.CharacterAdded:Connect(function()
-    wait(0.5)
-    aplicarVelocidade()
-end)
+local velocidadeValor = 25 -- valor inicial
 
 -- Slider de Velocidade
 AddSlider(Main, {
@@ -155,20 +135,46 @@ AddSlider(Main, {
     Default = 25,
     Increase = 1,
     Callback = function(Value)
-        velocidadeSelecionada = Value
-        aplicarVelocidade()
+        velocidadeValor = Value
+        if velocidadeAtivada then
+            local character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+            local humanoid = character:FindFirstChildOfClass("Humanoid")
+            if humanoid then
+                humanoid.WalkSpeed = velocidadeValor
+            end
+        end
     end
 })
 
--- Toggle para ativar/desativar velocidade
+-- Toggle para ativar/desativar a velocidade
 AddToggle(Main, {
     Name = "Velocidade",
     Default = false,
     Callback = function(Value)
         velocidadeAtivada = Value
-        aplicarVelocidade()
+        local character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+        local humanoid = character:FindFirstChildOfClass("Humanoid")
+        if humanoid then
+            humanoid.WalkSpeed = Value and velocidadeValor or 16
+        end
     end
 })
+
+local jumpAtivado = false
+local jumpPowerSelecionado = 25
+
+-- Função para aplicar altura do pulo
+local function aplicarJumpPower()
+    if jumpAtivado then
+        local player = game.Players.LocalPlayer
+        local character = player.Character or player.CharacterAdded:Wait()
+        local humanoid = character:FindFirstChildOfClass("Humanoid")
+        if humanoid then
+            humanoid.UseJumpPower = true
+            humanoid.JumpPower = jumpPowerSelecionado
+        end
+    end
+end
 
 -- Slider de Altura do Pulo
 AddSlider(Main, {
@@ -178,75 +184,53 @@ AddSlider(Main, {
     Default = 25,
     Increase = 1,
     Callback = function(Value)
-        local player = game.Players.LocalPlayer
-        local character = player.Character or player.CharacterAdded:Wait()
-        local humanoid = character:FindFirstChildOfClass("Humanoid")
-        if humanoid then
-            humanoid.UseJumpPower = true
-            humanoid.JumpPower = Value
-        end
+        jumpPowerSelecionado = Value
+        aplicarJumpPower()
     end
 })
 
-local gravidadeSelecionada = 25 -- valor padrão
-
--- Função para aplicar gravidade
-local function aplicarGravidade()
-    workspace.Gravity = gravidadeSelecionada
-end
-
--- Slider de Gravidade
-AddSlider(Main, {
-    Name = "Gravidade",
-    MinValue = 0,
-    MaxValue = 500,
-    Default = 25,
-    Increase = 1,
+-- Toggle para ativar/desativar altura do pulo personalizada
+AddToggle(Main, {
+    Name = "Atura do pulo",
+    Default = false,
     Callback = function(Value)
-        gravidadeSelecionada = Value
-        aplicarGravidade()
+        jumpAtivado = Value
+        aplicarJumpPower()
     end
 })
 
-local Players = game:GetService("Players")
-local LocalPlayer = Players.LocalPlayer
-local Camera = workspace.CurrentCamera
 
 local fovAtivado = false
-local fovValor = 70 -- Valor inicial padrão
-local fovPadrao = 70 -- Valor padrão usado ao desativar
+local fovValor = 70 -- valor inicial padrão
 
 -- Função para aplicar o FOV
 local function aplicarFov()
-    if fovAtivado then
-        Camera.FieldOfView = fovValor
-    else
-        Camera.FieldOfView = fovPadrao
+    local camera = workspace.CurrentCamera
+    if camera and fovAtivado then
+        camera.FieldOfView = fovValor
     end
 end
 
 -- Atualiza FOV quando o personagem respawnar
-LocalPlayer.CharacterAdded:Connect(function()
-    task.wait(0.5)
+game.Players.LocalPlayer.CharacterAdded:Connect(function()
+    wait(0.5)
     aplicarFov()
 end)
 
--- Slider para ajustar o FOV (Field of View)
+-- Slider para ajustar o FOV
 AddSlider(Main, {
     Name = "Campo de visão",
     MinValue = 16,
     MaxValue = 120,
-    Default = fovValor,
+    Default = 70,
     Increase = 1,
     Callback = function(Value)
         fovValor = Value
-        if fovAtivado then
-            aplicarFov()
-        end
+        aplicarFov()
     end
 })
 
--- Toggle para ativar/desativar o FOV personalizado
+-- Toggle para ativar/desativar o FOV
 AddToggle(Main, {
     Name = "Campo de visão",
     Default = false,
@@ -473,7 +457,17 @@ local playerName = ""
 local observando = false
 local observarConnection = nil
 
--- Função para encontrar jogador pelo começo do nome
+-- Caixa de texto para digitar nome do jogador
+AddTextBox(Player, {
+    Name = "Digite o nome do jogador",
+    Default = "",
+    Placeholder = "Nome do jogador aqui...",
+    Callback = function(text)
+        playerName = text
+    end
+})
+
+-- Função para encontrar jogador pelo nome digitado (busca começa pelo começo do nome)
 local function encontrarJogador(nome)
     local lowerName = nome:lower()
     for _, player in pairs(Players:GetPlayers()) do
@@ -484,21 +478,6 @@ local function encontrarJogador(nome)
     return nil
 end
 
--- Caixa de texto para digitar nome do jogador com preenchimento automático
-AddTextBox(Player, {
-    Name = "Digite o nome do jogador",
-    Default = "",
-    Placeholder = "Nome do jogador aqui...",
-    Callback = function(text)
-        local encontrado = encontrarJogador(text)
-        if encontrado then
-            playerName = encontrado.Name -- Atualiza com o nome completo
-        else
-            playerName = text -- Mantém o texto original se não encontrar
-        end
-    end
-})
-
 -- Função para parar de observar
 local function pararObservar()
     if observarConnection then
@@ -506,28 +485,34 @@ local function pararObservar()
         observarConnection = nil
     end
     observando = false
+
+    -- Reseta a câmera para modo padrão (seguindo o próprio personagem)
     if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
         workspace.CurrentCamera.CameraSubject = LocalPlayer.Character.Humanoid
     end
+
     print("Observação desativada.")
 end
 
--- Função para iniciar observação (seguir com a câmera)
+-- Função para iniciar observação (mudar câmera para seguir jogador)
 local function iniciarObservar(jogador)
     if not jogador or jogador == LocalPlayer then
         warn("Jogador inválido para observar.")
         return
     end
+
     observando = true
+
     if not jogador.Character or not jogador.Character:FindFirstChild("Humanoid") then
         warn("Personagem do jogador não está disponível.")
         return
     end
+
+    -- Define a câmera para seguir o humanoide do jogador alvo
     workspace.CurrentCamera.CameraSubject = jogador.Character.Humanoid
     print("Observando " .. jogador.Name)
 end
 
--- Toggle para ativar/desativar observação
 AddToggle(Player, {
     Name = "Observar",
     Default = false,
@@ -666,6 +651,40 @@ AddToggle(Settings, {
     Default = false,
     Callback = function(Value)
         notificacaoAtivada = Value
-        notify("Notificações", Value and "Ativada" or "Desativadas")
+        notify("Notificações", Value and "Ativadas" or "Desativadas")
     end
 })
+
+AddButton(Settings, {
+    Name = "FPS Boost",
+    Callback = function()
+        pcall(function()
+            -- Otimiza partes do workspace
+            for _, v in ipairs(workspace:GetDescendants()) do
+                if v:IsA("Part") or v:IsA("MeshPart") or v:IsA("UnionOperation") then
+                    v.Material = Enum.Material.SmoothPlastic
+                    v.Reflectance = 0
+                    v.CastShadow = false
+                elseif v:IsA("Decal") or v:IsA("Texture") then
+                    v.Transparency = 1
+                elseif v:IsA("ParticleEmitter") or v:IsA("Trail") or v:IsA("Smoke") or v:IsA("Fire") or v:IsA("Explosion") then
+                    v:Destroy()
+                end
+            end
+
+            -- Ajustes gráficos globais
+            local success = pcall(function()
+                settings().Rendering.QualityLevel = Enum.QualityLevel.Level01
+                workspace.GlobalShadows = false
+
+                if game:FindFirstChild("Lighting") then
+                    local lighting = game.Lighting
+                    lighting.FogEnd = 9e9
+                    lighting.GlobalShadows = false
+                    lighting.Brightness = 2
+                end
+            end)
+
+            -- Notificação (opcional, remova se não quiser)
+            if typeof(Fluent) == "table" and Fluent.Notify then
+          
