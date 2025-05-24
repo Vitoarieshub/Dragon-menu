@@ -188,6 +188,26 @@ AddSlider(Main, {
     end
 })
 
+local gravidadeSelecionada = 25 -- valor padrão
+
+-- Função para aplicar gravidade
+local function aplicarGravidade()
+    workspace.Gravity = gravidadeSelecionada
+end
+
+-- Slider de Gravidade
+AddSlider(Main, {
+    Name = "Gravidade",
+    MinValue = 0,
+    MaxValue = 500,
+    Default = 25,
+    Increase = 1,
+    Callback = function(Value)
+        gravidadeSelecionada = Value
+        aplicarGravidade()
+    end
+})
+
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local Camera = workspace.CurrentCamera
