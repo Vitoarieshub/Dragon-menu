@@ -162,16 +162,19 @@ AddToggle(Main, {
 
 local jumpAtivado = false
 local jumpPowerSelecionado = 25
+local jumpPowerPadrao = 50  -- Valor padrão do JumpPower do Roblox
 
--- Função para aplicar altura do pulo
+-- Função para aplicar ou restaurar altura do pulo
 local function aplicarJumpPower()
-    if jumpAtivado then
-        local player = game.Players.LocalPlayer
-        local character = player.Character or player.CharacterAdded:Wait()
-        local humanoid = character:FindFirstChildOfClass("Humanoid")
-        if humanoid then
-            humanoid.UseJumpPower = true
+    local player = game.Players.LocalPlayer
+    local character = player.Character or player.CharacterAdded:Wait()
+    local humanoid = character:FindFirstChildOfClass("Humanoid")
+    if humanoid then
+        humanoid.UseJumpPower = true
+        if jumpAtivado then
             humanoid.JumpPower = jumpPowerSelecionado
+        else
+            humanoid.JumpPower = jumpPowerPadrao
         end
     end
 end
@@ -185,20 +188,21 @@ AddSlider(Main, {
     Increase = 1,
     Callback = function(Value)
         jumpPowerSelecionado = Value
-        aplicarJumpPower()
+        if jumpAtivado then
+            aplicarJumpPower()
+        end
     end
 })
 
--- Toggle para ativar/desativar altura do pulo personalizada
+-- Toggle para ativar/desativar altura do pulo
 AddToggle(Main, {
-    Name = "Atura do pulo",
+    Name = "Altura do pulo",
     Default = false,
     Callback = function(Value)
         jumpAtivado = Value
         aplicarJumpPower()
     end
 })
-
 
 local fovAtivado = false
 local fovValor = 70 -- valor inicial padrão
