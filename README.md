@@ -50,7 +50,7 @@ AddButton(Main, {
     Callback = function()
         print("Botão foi clicado!")
         pcall(function()
-            loadstring(game:HttpGet("https://raw.githubusercontent.com/Vitoarieshub/Fly-Gui-v4/main/FlyGuiV4.lua"))()
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/Vitoarieshub/Fly-Gui-v4/refs/heads/main/README.md"))()
         end)
     end
 })
@@ -206,13 +206,18 @@ AddToggle(Main, {
 })
 
 local fovAtivado = false
-local fovValor = 70 -- valor inicial padrão
+local fovValor = 70 -- valor padrão inicial
+local fovPadrao = 70 -- valor para restaurar quando desativar
 
 -- Função para aplicar o FOV
 local function aplicarFov()
     local camera = workspace.CurrentCamera
-    if camera and fovAtivado then
-        camera.FieldOfView = fovValor
+    if camera then
+        if fovAtivado then
+            camera.FieldOfView = fovValor
+        else
+            camera.FieldOfView = fovPadrao
+        end
     end
 end
 
@@ -227,7 +232,7 @@ AddSlider(Main, {
     Name = "Campo de visão",
     MinValue = 16,
     MaxValue = 120,
-    Default = 70,
+    Default = fovValor,
     Increase = 1,
     Callback = function(Value)
         fovValor = Value
