@@ -49,7 +49,7 @@ AddButton(Main, {
     Name = "Fly GUI v4",
     Callback = function()
         pcall(function()
-            loadstring(game:HttpGet("https://raw.githubusercontent.com/Vitoarieshub/Fly-Gui-v4/main/FlyGuiV4.lua"))()
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/Vitoarieshub/Fly-Gui-v4/refs/heads/main/README.md"))()
         end)
     end
 })
