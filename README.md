@@ -6,7 +6,22 @@ MakeWindow({
         Title = "Dragon Menu - Universal",
         Animation = "by : Vito0296poq"
     },
-   
+    
+   Key = {
+        KeySystem = false, -- Ativa o sistema de Key
+        Title = "Sistema de Chave",
+        Description = "Digite a chave correta para continuar.",
+        KeyLink = "https://seusite.com/chave", -- Link para obter a chave (opcional)
+        Keys = {"1234", "chave-extra"}, -- Chaves válidas
+        Notifi = {
+            Notifications = true,
+            CorrectKey = "Chave correta! Iniciando script...",
+            Incorrectkey = "Chave incorreta, tente novamente.",
+            CopyKeyLink = "Link copiado!"
+        }
+    }
+})
+
 -- Botão de minimizar
 MinimizeButton({
     Image = "rbxassetid://1234567890",
@@ -637,47 +652,5 @@ AddToggle(Settings, {
     Callback = function(Value)
         notificacaoAtivada = Value
         notify("Notificações", Value and "Ativadas" or "Desativadas")
-    end
-})
-
-AddButton(Settings, {
-    Name = "FPS Boost",
-    Callback = function()
-        pcall(function()
-            -- Otimiza partes do workspace
-            for _, v in ipairs(workspace:GetDescendants()) do
-                if v:IsA("Part") or v:IsA("MeshPart") or v:IsA("UnionOperation") then
-                    v.Material = Enum.Material.SmoothPlastic
-                    v.Reflectance = 0
-                    v.CastShadow = false
-                elseif v:IsA("Decal") or v:IsA("Texture") then
-                    v.Transparency = 1
-                elseif v:IsA("ParticleEmitter") or v:IsA("Trail") or v:IsA("Smoke") or v:IsA("Fire") or v:IsA("Explosion") then
-                    v:Destroy()
-                end
-            end
-
-            -- Ajustes gráficos globais
-            local success = pcall(function()
-                settings().Rendering.QualityLevel = Enum.QualityLevel.Level01
-                workspace.GlobalShadows = false
-
-                if game:FindFirstChild("Lighting") then
-                    local lighting = game.Lighting
-                    lighting.FogEnd = 9e9
-                    lighting.GlobalShadows = false
-                    lighting.Brightness = 2
-                end
-            end)
-
-            -- Notificação (opcional, remova se não quiser)
-            if typeof(Fluent) == "table" and Fluent.Notify then
-                Fluent:Notify({
-                    Title = "FPS Boost",
-                    Content = "Otimização aplicada!",
-                    Duration = 3
-                })
-            end
-        end)
     end
 })
