@@ -34,8 +34,9 @@ MinimizeButton({
 
 -- Criação da aba principal
 local Main = MakeTab({Name = "Principal"})
+local Visuais = MakeTab({Name = "Visuais"})
 local Player = MakeTab({Name = "Jogadores"})
-local Settings = MakeTab({Name = "Configuração"})
+
 
 -- Notificação inicial
 -- Removido se não quiser notificação:
@@ -324,7 +325,7 @@ local function monitorarPlayer(player)
 end
 
 -- Toggle para ativar/desativar o ESP
-AddToggle(Player, {
+AddToggle(Visuais, {
     Name = "ESP nome",
     Default = false,
     Callback = function(Value)
@@ -446,7 +447,7 @@ function desativarESP()
     espConnections = {}
 end
 
-AddToggle(Player, {
+AddToggle(Visuais, {
     Name = "ESP Linha",
     Default = false,
     Callback = function(Value)
@@ -558,7 +559,7 @@ AddTextBox(Player, {
     end
 })
 
--- Função para encontrar jogador pelo nome digitado (busca começa pelo começo do nome)
+-- Função para encontrar jogador pelo nome digitado (busca parcial)
 local function encontrarJogador(nome)
     local lowerName = nome:lower()
     for _, player in pairs(Players:GetPlayers()) do
@@ -569,7 +570,26 @@ local function encontrarJogador(nome)
     return nil
 end
 
--- Função para parar o teleporte em loop
+-- Teleporte único
+AddButton(Player, {
+    Name = "Teleporte",
+    Callback = function()
+        local jogador = encontrarJogador(playerName)
+        if jogador and jogador.Character and jogador.Character:FindFirstChild("HumanoidRootPart") then
+            local localChar = LocalPlayer.Character
+            if localChar and localChar:FindFirstChild("HumanoidRootPart") then
+                localChar.HumanoidRootPart.CFrame = jogador.Character.HumanoidRootPart.CFrame * CFrame.new(3, 0, 3)
+                print("Teletransportado para " .. jogador.Name)
+            else
+                warn("Seu personagem não está disponível.")
+            end
+        else
+            warn("Jogador inválido ou personagem não carregado.")
+        end
+    end
+})
+
+-- Parar o teleporte em loop
 local function pararTeleportar()
     if teleportLoopConnection then
         teleportLoopConnection:Disconnect()
@@ -579,7 +599,7 @@ local function pararTeleportar()
     print("Teleporte em loop desativado.")
 end
 
--- Função para iniciar teleporte em loop
+-- Iniciar o teleporte em loop
 local function iniciarTeleportar(jogador)
     if not jogador or jogador == LocalPlayer then
         warn("Jogador inválido para teleportar.")
@@ -588,29 +608,21 @@ local function iniciarTeleportar(jogador)
 
     teleportando = true
 
-    if not jogador.Character or not jogador.Character:FindFirstChild("HumanoidRootPart") then
-        warn("Personagem do jogador não está disponível.")
-        return
-    end
-
     teleportLoopConnection = RunService.RenderStepped:Connect(function()
-        if not teleportando then return end
-
         local localChar = LocalPlayer.Character
         local targetChar = jogador.Character
 
-        if localChar and targetChar and localChar:FindFirstChild("HumanoidRootPart") and targetChar:FindFirstChild("HumanoidRootPart") then
-            -- Teleporta perto do jogador (distância ajustável)
+        if teleportando and localChar and targetChar and
+            localChar:FindFirstChild("HumanoidRootPart") and
+            targetChar:FindFirstChild("HumanoidRootPart") then
             localChar.HumanoidRootPart.CFrame = targetChar.HumanoidRootPart.CFrame * CFrame.new(3, 0, 3)
-        else
-            warn("Personagem do jogador ou seu personagem não está disponível.")
         end
     end)
 
-    print("Teleportando em loop para " .. jogador.Name)
+    print("Teleporte contínuo para " .. jogador.Name)
 end
 
--- Toggle para ativar/desativar teleporte em loop
+-- Toggle de teleporte em loop
 AddToggle(Player, {
     Name = "Teleporte em Loop",
     Default = false,
@@ -627,7 +639,6 @@ AddToggle(Player, {
         end
     end
 })
-
 local Players = game:GetService("Players")
 local StarterGui = game:GetService("StarterGui")
 
@@ -656,7 +667,7 @@ Players.PlayerRemoving:Connect(function(player)
 end)
 
 -- Toggle para ativar/desativar as notificações
-AddToggle(Settings, {
+AddToggle(Player, {
     Name = "Notificações de jogadores",
     Default = false,
     Callback = function(Value)
