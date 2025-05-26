@@ -464,82 +464,113 @@ local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local RunService = game:GetService("RunService")
 
-local playerName = ""
+local jogadorSelecionado = nil
 local observando = false
 local observarConnection = nil
+local dropdownRef = nil -- referência para atualizar opções do dropdown
+local nomesAtuais = {} -- cache para verificar se a lista mudou
 
--- Caixa de texto para digitar nome do jogador
-AddTextBox(Player, {
-    Name = "Digite o nome do jogador",
-    Default = "",
-    Placeholder = "Nome do jogador aqui...",
-    Callback = function(text)
-        playerName = text
-    end
-})
-
--- Função para encontrar jogador pelo nome digitado (busca começa pelo começo do nome)
-local function encontrarJogador(nome)
-    local lowerName = nome:lower()
-    for _, player in pairs(Players:GetPlayers()) do
-        if player.Name:lower():sub(1, #lowerName) == lowerName then
-            return player
-        end
-    end
-    return nil
+-- Gera a lista de nomes dos jogadores
+local function gerarListaDeJogadores()
+	local nomes = {}
+	for _, player in ipairs(Players:GetPlayers()) do
+		if player ~= LocalPlayer then
+			table.insert(nomes, player.Name)
+		end
+	end
+	return nomes
 end
 
--- Função para parar de observar
+-- Compara duas listas
+local function listasDiferentes(lista1, lista2)
+	if #lista1 ~= #lista2 then return true end
+	for i, v in ipairs(lista1) do
+		if v ~= lista2[i] then return true end
+	end
+	return false
+end
+
+-- Atualiza o dropdown se a lista de jogadores mudou
+local function atualizarDropdownPeriodicamente()
+	while true do
+		local novaLista = gerarListaDeJogadores()
+		if listasDiferentes(novaLista, nomesAtuais) then
+			nomesAtuais = novaLista
+			if dropdownRef and dropdownRef.UpdateOptions then
+				dropdownRef:UpdateOptions(novaLista)
+			end
+		end
+		wait(1)
+	end
+end
+
+-- Observação contínua
+local function observarJogador(jogador)
+	if observarConnection then
+		observarConnection:Disconnect()
+	end
+
+	local function setarCamera()
+		if jogador.Character and jogador.Character:FindFirstChild("Humanoid") then
+			workspace.CurrentCamera.CameraSubject = jogador.Character.Humanoid
+			print("Observando " .. jogador.Name)
+		end
+	end
+
+	setarCamera()
+
+	-- Conecta para continuar observando após respawn
+	observarConnection = jogador.CharacterAdded:Connect(function()
+		wait(1)
+		if observando then
+			setarCamera()
+		end
+	end)
+end
+
+-- Parar observação
 local function pararObservar()
-    if observarConnection then
-        observarConnection:Disconnect()
-        observarConnection = nil
-    end
-    observando = false
+	if observarConnection then
+		observarConnection:Disconnect()
+		observarConnection = nil
+	end
+	observando = false
 
-    -- Reseta a câmera para modo padrão (seguindo o próprio personagem)
-    if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
-        workspace.CurrentCamera.CameraSubject = LocalPlayer.Character.Humanoid
-    end
+	if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
+		workspace.CurrentCamera.CameraSubject = LocalPlayer.Character.Humanoid
+	end
 
-    print("Observação desativada.")
+	print("Observação desativada.")
 end
 
--- Função para iniciar observação (mudar câmera para seguir jogador)
-local function iniciarObservar(jogador)
-    if not jogador or jogador == LocalPlayer then
-        warn("Jogador inválido para observar.")
-        return
-    end
-
-    observando = true
-
-    if not jogador.Character or not jogador.Character:FindFirstChild("Humanoid") then
-        warn("Personagem do jogador não está disponível.")
-        return
-    end
-
-    -- Define a câmera para seguir o humanoide do jogador alvo
-    workspace.CurrentCamera.CameraSubject = jogador.Character.Humanoid
-    print("Observando " .. jogador.Name)
-end
+-- Criar dropdown e toggle
+dropdownRef = AddDropdown(Player, {
+	Name = "Selecionar jogador para observar",
+	Options = gerarListaDeJogadores(),
+	Callback = function(valorSelecionado)
+		jogadorSelecionado = Players:FindFirstChild(valorSelecionado)
+	end
+})
 
 AddToggle(Player, {
-    Name = "Observar",
-    Default = false,
-    Callback = function(Value)
-        if Value then
-            local jogador = encontrarJogador(playerName)
-            if jogador then
-                iniciarObservar(jogador)
-            else
-                warn("Jogador não encontrado para observar.")
-            end
-        else
-            pararObservar()
-        end
-    end
+	Name = "Observar",
+	Default = false,
+	Callback = function(Value)
+		if Value then
+			if jogadorSelecionado then
+				observando = true
+				observarJogador(jogadorSelecionado)
+			else
+				warn("Nenhum jogador selecionado.")
+			end
+		else
+			pararObservar()
+		end
+	end
 })
+
+-- Iniciar atualização contínua da lista
+task.spawn(atualizarDropdownPeriodicamente)
 
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
@@ -672,6 +703,6 @@ AddToggle(Player, {
     Default = false,
     Callback = function(Value)
         notificacaoAtivada = Value
-        notify("Notificações", Value and "Ativadas" or "Desativadas")
+        notify("Notificações", Value and "Ativada" or "Desativada")
     end
 })
