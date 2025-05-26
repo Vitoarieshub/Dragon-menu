@@ -206,6 +206,39 @@ AddToggle(Main, {
     end
 })
 
+local gravidadeAtivada = false
+local gravidadeSelecionada = 196.2 -- valor padrão
+local gravidadePadrao = 196.2
+
+-- Slider para ajustar a gravidade
+AddSlider(Main, {
+    Name = "Gravidade",
+    MinValue = 0,
+    MaxValue = 500,
+    Default = 196.2,
+    Increase = 1,
+    Callback = function(Value)
+        gravidadeSelecionada = Value
+        if gravidadeAtivada then
+            workspace.Gravity = gravidadeSelecionada
+        end
+    end
+})
+
+-- Toggle para ativar/desativar o controle de gravidade
+AddToggle(Main, {
+    Name = "Gravidade",
+    Default = false,
+    Callback = function(Value)
+        gravidadeAtivada = Value
+        if gravidadeAtivada then
+            workspace.Gravity = gravidadeSelecionada
+        else
+            workspace.Gravity = gravidadePadrao
+        end
+    end
+})
+
 local fovAtivado = false
 local fovValor = 70 -- valor padrão inicial
 local fovPadrao = 70 -- valor para restaurar quando desativar
@@ -229,7 +262,7 @@ game.Players.LocalPlayer.CharacterAdded:Connect(function()
 end)
 
 -- Slider para ajustar o FOV
-AddSlider(Main, {
+AddSlider(Visuais, {
     Name = "Campo de visão",
     MinValue = 16,
     MaxValue = 120,
@@ -242,7 +275,7 @@ AddSlider(Main, {
 })
 
 -- Toggle para ativar/desativar o FOV
-AddToggle(Main, {
+AddToggle(Visuais, {
     Name = "Campo de visão",
     Default = false,
     Callback = function(Value)
@@ -326,7 +359,7 @@ end
 
 -- Toggle para ativar/desativar o ESP
 AddToggle(Visuais, {
-    Name = "ESP nome",
+    Name = "ESP Nome",
     Default = false,
     Callback = function(Value)
         espAtivado = Value
@@ -656,34 +689,3 @@ AddToggle(Player, {
         notify("Notificações", Value and "Ativada" or "Desativada")
     end
 })
-
-AddToggle(Player, {
-    Name = "FPS Boost",
-    Default = false,
-    Callback = function(Value)
-        if Value then
-            -- Otimiza partes e efeitos
-            for _, v in ipairs(workspace:GetDescendants()) do
-                if v:IsA("Part") or v:IsA("MeshPart") or v:IsA("UnionOperation") then
-                    v.Material = Enum.Material.SmoothPlastic
-                    v.Reflectance = 0
-                    v.CastShadow = false
-                elseif v:IsA("Decal") or v:IsA("Texture") then
-                    v.Transparency = 1
-                elseif v:IsA("ParticleEmitter") or v:IsA("Trail") or v:IsA("Smoke") or v:IsA("Fire") or v:IsA("Explosion") then
-                    v:Destroy()
-                end
-            end
-
-            -- Ajusta configurações gráficas
-            pcall(function()
-                settings().Rendering.QualityLevel = Enum.QualityLevel.Level01
-                workspace.GlobalShadows = false
-
-                if game:FindFirstChild("Lighting") then
-                    local lighting = game.Lighting
-                    lighting.FogEnd = 1e10
-                    lighting.GlobalShadows = false
-                    lighting.Brightness = 2
-                end
-            end)
