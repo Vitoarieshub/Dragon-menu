@@ -3,7 +3,7 @@ loadstring(game:HttpGet("https://raw.githubusercontent.com/Snxdfer/back-ups-for-
 -- Cria a janela principal
 MakeWindow({
     Hub = {
-        Title = "Dragon Menu - Universal",
+        Title = "Dragon Menu - Ilha Bela",
         Animation = "by : Vito0296poq"
     },
     
@@ -47,11 +47,11 @@ local Player = MakeTab({Name = "Jogadores"})
 -- })
 
 AddButton(Main, {
-    Name = "Fly GUI v4",
+    Name = "Fly GUI Car",
     Callback = function()
         print("Botão foi clicado!")
         pcall(function()
-            loadstring(game:HttpGet("https://raw.githubusercontent.com/Vitoarieshub/Fly-Gui-v4/refs/heads/main/README.md"))()
+            loadstring(game:HttpGet('https://raw.githubusercontent.com/ScpGuest666/Random-Roblox-script/refs/heads/main/Roblox%20Vehicle%20Fly%20Gui%20script'))()
         end)
     end
 })
@@ -186,7 +186,7 @@ AddSlider(Main, {
     Name = "Altura do pulo",
     MinValue = 10,
     MaxValue = 900,
-    Default = 30,
+    Default = 25,
     Increase = 1,
     Callback = function(Value)
         jumpPowerSelecionado = Value
@@ -203,39 +203,6 @@ AddToggle(Main, {
     Callback = function(Value)
         jumpAtivado = Value
         aplicarJumpPower()
-    end
-})
-
-local gravidadeAtivada = false
-local gravidadeSelecionada = 196.2 -- valor padrão
-local gravidadePadrao = 196.2
-
--- Slider para ajustar a gravidade
-AddSlider(Main, {
-    Name = "Gravidade",
-    MinValue = 0,
-    MaxValue = 500,
-    Default = 196.2,
-    Increase = 1,
-    Callback = function(Value)
-        gravidadeSelecionada = Value
-        if gravidadeAtivada then
-            workspace.Gravity = gravidadeSelecionada
-        end
-    end
-})
-
--- Toggle para ativar/desativar o controle de gravidade
-AddToggle(Main, {
-    Name = "Gravidade",
-    Default = false,
-    Callback = function(Value)
-        gravidadeAtivada = Value
-        if gravidadeAtivada then
-            workspace.Gravity = gravidadeSelecionada
-        else
-            workspace.Gravity = gravidadePadrao
-        end
     end
 })
 
@@ -314,7 +281,7 @@ end
 
 -- Toggle para ativar/desativar o ESP
 AddToggle(Visuais, {
-    Name = "ESP Nome",
+    Name = "ESP nome",
     Default = false,
     Callback = function(Value)
         espAtivado = Value
@@ -354,178 +321,176 @@ AddToggle(Visuais, {
 })
 
 local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
 local LocalPlayer = Players.LocalPlayer
-local linhas = {}
+local espTags = {}
 local espConnections = {}
-local espLinhaAtivado = false
-local corVermelha = Color3.fromRGB(255, 0, 0)
+local espAtivo = false
 
-local function criarLinha(player)
-    if player == LocalPlayer then return end
+-- Cria o ESP acima do jogador se for STAFF
+local function createESP(player)
+	local character = player.Character
+	if not character then return end
 
-    if linhas[player] then
-        linhas[player]:Remove()
-        linhas[player] = nil
-    end
-    if espConnections[player] then
-        espConnections[player]:Disconnect()
-        espConnections[player] = nil
-    end
+	local head = character:FindFirstChild("Head")
+	if not head then return end
 
-    local linha = Drawing.new("Line")
-    linha.Thickness = 2
-    linha.Transparency = 1
-    linha.Visible = false
-    linha.Color = corVermelha
-    linhas[player] = linha
+	-- Verifica se já existe ESP
+	if espTags[player] then return end
 
-    espConnections[player] = RunService.RenderStepped:Connect(function()
-        if not espLinhaAtivado then
-            linha.Visible = false
-            return
-        end
+	-- Verifica se existe "staff" em algum TextLabel
+	local hasStaffTag = false
+	for _, gui in pairs(head:GetChildren()) do
+		if gui:IsA("BillboardGui") then
+			for _, label in pairs(gui:GetChildren()) do
+				if label:IsA("TextLabel") and string.find(label.Text:lower(), "staff") then
+					hasStaffTag = true
+					break
+				end
+			end
+		end
+	end
 
-        local char = player.Character
-        local head = char and char:FindFirstChild("Head")
-        if not head then
-            linha.Visible = false
-            return
-        end
+	if not hasStaffTag then return end
 
-        local cam = workspace.CurrentCamera
-        local screenSize = cam.ViewportSize
-        local headPos, onScreen = cam:WorldToViewportPoint(head.Position)
+	-- Criar o Billboard ESP
+	local billboard = Instance.new("BillboardGui")
+	billboard.Name = "ESP_Staff"
+	billboard.Adornee = head
+	billboard.Size = UDim2.new(0, 100, 0, 20)
+	billboard.StudsOffset = Vector3.new(0, 2, 0)
+	billboard.AlwaysOnTop = true
 
-        if onScreen then
-            linha.From = Vector2.new(screenSize.X / 2, 0)
-            linha.To = Vector2.new(headPos.X, headPos.Y)
-            linha.Visible = true
-        else
-            linha.Visible = false
-        end
-    end)
+	local text = Instance.new("TextLabel")
+	text.Size = UDim2.new(1, 0, 1, 0)
+	text.BackgroundTransparency = 1
+	text.Text = "STAFF"
+	text.TextColor3 = Color3.fromRGB(255, 0, 0)
+	text.TextStrokeTransparency = 0
+	text.Font = Enum.Font.SourceSansBold
+	text.TextScaled = true
+	text.Parent = billboard
 
-    player.CharacterAdded:Connect(function()
-        wait(1)
-        if espLinhaAtivado then
-            criarLinha(player)
-        end
-    end)
+	billboard.Parent = head
+	espTags[player] = billboard
 end
 
-function ativarESP()
-    for _, p in ipairs(Players:GetPlayers()) do
-        criarLinha(p)
-    end
-    espConnections["PlayerAdded"] = Players.PlayerAdded:Connect(function(p)
-        wait(1)
-        criarLinha(p)
-    end)
+-- Remove todos os ESPs e desconecta eventos
+local function removeAllESP()
+	for player, gui in pairs(espTags) do
+		if gui and gui.Parent then
+			gui:Destroy()
+		end
+	end
+	espTags = {}
+
+	for _, conn in pairs(espConnections) do
+		if conn then conn:Disconnect() end
+	end
+	espConnections = {}
 end
 
-function desativarESP()
-    for _, linha in pairs(linhas) do
-        if linha then linha:Remove() end
-    end
-    linhas = {}
-    for _, conn in pairs(espConnections) do
-        if conn then conn:Disconnect() end
-    end
-    espConnections = {}
+-- Ativa ou desativa o ESP
+local function toggleEsp(enabled)
+	removeAllESP()
+	espAtivo = enabled
+
+	if not enabled then return end
+
+	for _, player in pairs(Players:GetPlayers()) do
+		if player ~= LocalPlayer then
+			-- Cria ESP se personagem já existe
+			if player.Character then
+				createESP(player)
+			end
+
+			-- Conecta para novos personagens
+			local conn = player.CharacterAdded:Connect(function()
+				wait(1)
+				if espAtivo then
+					createESP(player)
+				end
+			end)
+			table.insert(espConnections, conn)
+		end
+	end
+
+	-- Detecta novos jogadores
+	local conn = Players.PlayerAdded:Connect(function(player)
+		local sub = player.CharacterAdded:Connect(function()
+			wait(1)
+			if espAtivo then
+				createESP(player)
+			end
+		end)
+		table.insert(espConnections, sub)
+	end)
+	table.insert(espConnections, conn)
 end
 
+-- Botão na interface
 AddToggle(Visuais, {
-    Name = "ESP Linha",
-    Default = false,
-    Callback = function(Value)
-        espLinhaAtivado = Value
-        if espLinhaAtivado then
-            ativarESP()
-        else
-            desativarESP()
-        end
-    end
-})
-
-local fovAtivado = false
-local fovValor = 70 -- valor padrão inicial
-local fovPadrao = 70 -- valor para restaurar quando desativar
-
--- Função para aplicar o FOV
-local function aplicarFov()
-    local camera = workspace.CurrentCamera
-    if camera then
-        if fovAtivado then
-            camera.FieldOfView = fovValor
-        else
-            camera.FieldOfView = fovPadrao
-        end
-    end
-end
-
--- Atualiza FOV quando o personagem respawnar
-game.Players.LocalPlayer.CharacterAdded:Connect(function()
-    wait(0.5)
-    aplicarFov()
-end)
-
--- Slider para ajustar o FOV
-AddSlider(Visuais, {
-    Name = "Campo de visão",
-    MinValue = 16,
-    MaxValue = 120,
-    Default = fovValor,
-    Increase = 1,
-    Callback = function(Value)
-        fovValor = Value
-        aplicarFov()
-    end
-})
-
--- Toggle para ativar/desativar o FOV
-AddToggle(Visuais, {
-    Name = "Campo de visão",
-    Default = false,
-    Callback = function(Value)
-        fovAtivado = Value
-        aplicarFov()
-    end
+	Name = "ESP STAFF",
+	Default = false,
+	Callback = function(Value)
+		toggleEsp(Value)
+	end
 })
 
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
-local RunService = game:GetService("RunService")
 
-local playerName = ""
 local jogadorSelecionado = nil
 local observando = false
 local observarConnection = nil
-local teleportLoopConnection = nil
-local teleportando = false
 local dropdownRef = nil
 
--- Função para encontrar jogador pelo nome digitado (busca parcial)
-local function encontrarJogador(nome)
-	local lowerName = nome:lower()
-	for _, player in pairs(Players:GetPlayers()) do
-		if player.Name:lower():sub(1, #lowerName) == lowerName then
-			return player
+-- Gera a lista atual de jogadores válidos
+local function gerarListaDeJogadores()
+	local nomes = {}
+	for _, player in ipairs(Players:GetPlayers()) do
+		if player ~= LocalPlayer then
+			table.insert(nomes, player.Name)
 		end
 	end
-	return nil
+	return nomes
 end
 
--- Caixa de texto para digitar nome do jogador
-AddTextBox(Player, {
-	Name = "Digite o nome do jogador",
-	Default = "",
-	Placeholder = "Nome do jogador aqui...",
-	Callback = function(text)
-		playerName = text
-		jogadorSelecionado = encontrarJogador(playerName)
+-- Atualiza o dropdown manualmente
+local function atualizarListaDropdown()
+	local nomesAtuais = gerarListaDeJogadores()
+
+	-- Limpa a seleção se o jogador saiu
+	if jogadorSelecionado and not Players:FindFirstChild(jogadorSelecionado.Name) then
+		jogadorSelecionado = nil
 	end
-})
+
+	if dropdownRef and dropdownRef.UpdateOptions then
+		dropdownRef:UpdateOptions(nomesAtuais)
+	end
+end
+
+-- Observação contínua
+local function observarJogador(jogador)
+	if observarConnection then
+		observarConnection:Disconnect()
+	end
+
+	local function setarCamera()
+		if jogador.Character and jogador.Character:FindFirstChild("Humanoid") then
+			workspace.CurrentCamera.CameraSubject = jogador.Character.Humanoid
+			print("Observando " .. jogador.Name)
+		end
+	end
+
+	setarCamera()
+
+	observarConnection = jogador.CharacterAdded:Connect(function()
+		wait(1)
+		if observando then
+			setarCamera()
+		end
+	end)
+end
 
 -- Parar observação
 local function pararObservar()
@@ -534,51 +499,43 @@ local function pararObservar()
 		observarConnection = nil
 	end
 	observando = false
+
 	if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
 		workspace.CurrentCamera.CameraSubject = LocalPlayer.Character.Humanoid
 	end
+
 	print("Observação desativada.")
 end
 
--- Iniciar observação
-local function iniciarObservar(jogador)
-	if not jogador or jogador == LocalPlayer then
-		warn("Jogador inválido para observar.")
-		return
+-- Criação do dropdown inicial
+dropdownRef = AddDropdown(Player, {
+	Name = "Selecionar jogador para observar",
+	Options = gerarListaDeJogadores(),
+	Callback = function(valorSelecionado)
+		jogadorSelecionado = Players:FindFirstChild(valorSelecionado)
 	end
+})
 
-	observando = true
-
-	if not jogador.Character or not jogador.Character:FindFirstChild("Humanoid") then
-		warn("Personagem do jogador não está disponível.")
-		return
+-- Botão manual para atualizar a lista
+AddButton(Player, {
+	Name = "Atualizar Lista de Jogadores",
+	Callback = function()
+		atualizarListaDropdown()
+		print("Lista de jogadores atualizada manualmente.")
 	end
-
-	workspace.CurrentCamera.CameraSubject = jogador.Character.Humanoid
-	print("Observando " .. jogador.Name)
-
-	observarConnection = jogador.CharacterAdded:Connect(function()
-		wait(1)
-		if observando then
-			if jogador.Character and jogador.Character:FindFirstChild("Humanoid") then
-				workspace.CurrentCamera.CameraSubject = jogador.Character.Humanoid
-				print("Continuando observação após respawn.")
-			end
-		end
-	end)
-end
+})
 
 -- Toggle para observar
 AddToggle(Player, {
 	Name = "Observar",
 	Default = false,
 	Callback = function(Value)
-		jogadorSelecionado = encontrarJogador(playerName)
 		if Value then
 			if jogadorSelecionado then
-				iniciarObservar(jogadorSelecionado)
+				observando = true
+				observarJogador(jogadorSelecionado)
 			else
-				warn("Jogador não encontrado para observar.")
+				warn("Nenhum jogador selecionado.")
 			end
 		else
 			pararObservar()
@@ -586,107 +543,128 @@ AddToggle(Player, {
 	end
 })
 
--- Botão de teleporte único
-AddButton(Player, {
-	Name = "Teleporte",
-	Callback = function()
-		local jogador = encontrarJogador(playerName)
-		if jogador and jogador.Character and jogador.Character:FindFirstChild("HumanoidRootPart") then
-			local localChar = LocalPlayer.Character
-			if localChar and localChar:FindFirstChild("HumanoidRootPart") then
-				localChar.HumanoidRootPart.CFrame = jogador.Character.HumanoidRootPart.CFrame * CFrame.new(3, 0, 3)
-				print("Teletransportado para " .. jogador.Name)
-			else
-				warn("Seu personagem não está disponível.")
-			end
-		else
-			warn("Jogador inválido ou personagem não carregado.")
-		end
-	end
-})
-
--- Parar teleporte em loop
-local function pararTeleportar()
-	if teleportLoopConnection then
-		teleportLoopConnection:Disconnect()
-		teleportLoopConnection = nil
-	end
-	teleportando = false
-	print("Teleporte em loop desativado.")
-end
-
--- Iniciar teleporte em loop
-local function iniciarTeleportar(jogador)
-	if not jogador or jogador == LocalPlayer then
-		warn("Jogador inválido para teleportar.")
-		return
-	end
-
-	teleportando = true
-
-	teleportLoopConnection = RunService.RenderStepped:Connect(function()
-		local localChar = LocalPlayer.Character
-		local targetChar = jogador.Character
-
-		if teleportando and localChar and targetChar and
-			localChar:FindFirstChild("HumanoidRootPart") and
-			targetChar:FindFirstChild("HumanoidRootPart") then
-			localChar.HumanoidRootPart.CFrame = targetChar.HumanoidRootPart.CFrame * CFrame.new(3, 0, 3)
-		end
-	end)
-
-	print("Teleporte contínuo para " .. jogador.Name)
-end
-
--- Toggle de teleporte contínuo
-AddToggle(Player, {
-	Name = "Teleporte em Loop",
-	Default = false,
-	Callback = function(Value)
-		jogadorSelecionado = encontrarJogador(playerName)
-		if Value then
-			if jogadorSelecionado then
-				iniciarTeleportar(jogadorSelecionado)
-			else
-				warn("Jogador não encontrado para teleportar.")
-			end
-		else
-			pararTeleportar()
-		end
-	end
-})
-
-local Players = game:GetService("Players")
-local StarterGui = game:GetService("StarterGui")
-
-local notificacaoAtivada = false
-
--- Função para exibir notificações
-local function notify(title, text)
-    if notificacaoAtivada then
-        StarterGui:SetCore("SendNotification", {
-            Title = title,
-            Text = text,
-            Duration = 5
-        })
-    end
-end
-
--- Notifica quando um jogador entra no jogo
-Players.PlayerAdded:Connect(function(player)
-    notify(player.Name, "entrou no jogo.")
-end)
-
--- Notifica quando um jogador sai do jogo
+-- Remove observação se o jogador sair
 Players.PlayerRemoving:Connect(function(player)
-    notify(player.Name, "saiu do jogo.")
+	if jogadorSelecionado == player then
+		pararObservar()
+		jogadorSelecionado = nil
+	end
 end)
 
--- Toggle para ativar/desativar notificações (sem aviso ao ativar)
-AddToggle(Player, {
-    Name = "Notificações de jogadores",
+- Toggle para ativar/desativar o ESP
+AddToggle(Visuais, {
+    Name = "ESP nome",
     Default = false,
     Callback = function(Value)
-        notificacaoAtivada = Value
+        espAtivado = Value
+        -- Variável para armazenar o estado do ESP
+local espAtivado = false
+local connections = {}
+        espAtivado = state
+        local Players = game:GetService("Players")
+        local LocalPlayer = Players.LocalPlayer
+
+        -- Função para criar ESP
+        local function criarESP(player)
+            if player == LocalPlayer then return end
+            if not espAtivado then return end
+
+            -- Atualização contínua
+            task.spawn(function()
+                while espAtivado do
+                    local char = player.Character
+                    local head = char and char:FindFirstChild("Head")
+                    local humanoid = char and char:FindFirstChild("Humanoid")
+
+                    if char and head and humanoid and humanoid.Health > 0 then
+                        local esp = head:FindFirstChild("ESP")
+                        if not esp then
+                            esp = Instance.new("BillboardGui")
+                            esp.Name = "ESP"
+                            esp.Adornee = head
+                            esp.Size = UDim2.new(0, 150, 0, 50)
+                            esp.StudsOffset = Vector3.new(0, 2, 0)
+                            esp.AlwaysOnTop = true
+
+                            local text = Instance.new("TextLabel")
+                            text.Name = "Texto"
+                            text.Size = UDim2.new(1, 0, 1, 0)
+                            text.BackgroundTransparency = 1
+                            text.TextColor3 = Color3.fromRGB(255, 255, 255)
+                            text.TextSize = 18
+                            text.TextScaled = true
+                            text.Font = Enum.Font.GothamBold
+                            text.TextStrokeTransparency = 0.4
+                            text.TextStrokeColor3 = Color3.new(0, 0, 0)
+                            text.TextTransparency = 0.2
+                            text.Parent = esp
+
+                            esp.Parent = head
+
+                            humanoid.Died:Connect(function()
+                                if esp then esp:Destroy() end
+                            end)
+                        end
+
+                        local texto = esp:FindFirstChild("Texto")
+                        if texto and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") and char:FindFirstChild("HumanoidRootPart") then
+                            local distancia = (LocalPlayer.Character.HumanoidRootPart.Position - char.HumanoidRootPart.Position).Magnitude
+                            texto.Text = player.Name .. " " .. math.floor(distancia)
+                            texto.TextTransparency = math.clamp(distancia / 150, 0.2, 0.9)
+                        end
+                    end
+                    wait(0.3)
+                end
+            end)
+        end
+
+        -- Função para monitorar respawns e mudanças
+        local function monitorarPlayer(player)
+            if connections[player] then
+                connections[player]:Disconnect()
+            end
+
+            connections[player] = player.CharacterAdded:Connect(function()
+                wait(1)
+                if espAtivado then
+                    criarESP(player)
+                end
+            end)
+
+            criarESP(player)
+        end
+
+        if espAtivado then
+            for _, player in ipairs(Players:GetPlayers()) do
+                monitorarPlayer(player)
+            end
+
+            connections["PlayerAdded"] = Players.PlayerAdded:Connect(function(player)
+                monitorarPlayer(player)
+            end)
+        else
+            -- Desativar ESP
+            for _, player in ipairs(Players:GetPlayers()) do
+                local char = player.Character
+                if char then
+                    local head = char:FindFirstChild("Head")
+                    if head then
+                        local esp = head:FindFirstChild("ESP")
+                        if esp then
+                            esp:Destroy()
+                        end
+                    end
+                end
+                if connections[player] then
+                    connections[player]:Disconnect()
+                    connections[player] = nil
+                end
+            end
+
+            if connections["PlayerAdded"] then
+                connections["PlayerAdded"]:Disconnect()
+                connections["PlayerAdded"] = nil
+            end
+        end
     end
 })
