@@ -464,69 +464,35 @@ local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local RunService = game:GetService("RunService")
 
+local playerName = ""
 local jogadorSelecionado = nil
 local observando = false
 local observarConnection = nil
-local dropdownRef = nil -- referência para atualizar opções do dropdown
-local nomesAtuais = {} -- cache para verificar se a lista mudou
+local teleportLoopConnection = nil
+local teleportando = false
+local dropdownRef = nil
 
--- Gera a lista de nomes dos jogadores
-local function gerarListaDeJogadores()
-	local nomes = {}
-	for _, player in ipairs(Players:GetPlayers()) do
-		if player ~= LocalPlayer then
-			table.insert(nomes, player.Name)
+-- Função para encontrar jogador pelo nome digitado (busca parcial)
+local function encontrarJogador(nome)
+	local lowerName = nome:lower()
+	for _, player in pairs(Players:GetPlayers()) do
+		if player.Name:lower():sub(1, #lowerName) == lowerName then
+			return player
 		end
 	end
-	return nomes
+	return nil
 end
 
--- Compara duas listas
-local function listasDiferentes(lista1, lista2)
-	if #lista1 ~= #lista2 then return true end
-	for i, v in ipairs(lista1) do
-		if v ~= lista2[i] then return true end
+-- Caixa de texto para digitar nome do jogador
+AddTextBox(Player, {
+	Name = "Digite o nome do jogador",
+	Default = "",
+	Placeholder = "Nome do jogador aqui...",
+	Callback = function(text)
+		playerName = text
+		jogadorSelecionado = encontrarJogador(playerName)
 	end
-	return false
-end
-
--- Atualiza o dropdown se a lista de jogadores mudou
-local function atualizarDropdownPeriodicamente()
-	while true do
-		local novaLista = gerarListaDeJogadores()
-		if listasDiferentes(novaLista, nomesAtuais) then
-			nomesAtuais = novaLista
-			if dropdownRef and dropdownRef.UpdateOptions then
-				dropdownRef:UpdateOptions(novaLista)
-			end
-		end
-		wait(1)
-	end
-end
-
--- Observação contínua
-local function observarJogador(jogador)
-	if observarConnection then
-		observarConnection:Disconnect()
-	end
-
-	local function setarCamera()
-		if jogador.Character and jogador.Character:FindFirstChild("Humanoid") then
-			workspace.CurrentCamera.CameraSubject = jogador.Character.Humanoid
-			print("Observando " .. jogador.Name)
-		end
-	end
-
-	setarCamera()
-
-	-- Conecta para continuar observando após respawn
-	observarConnection = jogador.CharacterAdded:Connect(function()
-		wait(1)
-		if observando then
-			setarCamera()
-		end
-	end)
-end
+})
 
 -- Parar observação
 local function pararObservar()
@@ -535,33 +501,51 @@ local function pararObservar()
 		observarConnection = nil
 	end
 	observando = false
-
 	if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
 		workspace.CurrentCamera.CameraSubject = LocalPlayer.Character.Humanoid
 	end
-
 	print("Observação desativada.")
 end
 
--- Criar dropdown e toggle
-dropdownRef = AddDropdown(Player, {
-	Name = "Selecionar jogador para observar",
-	Options = gerarListaDeJogadores(),
-	Callback = function(valorSelecionado)
-		jogadorSelecionado = Players:FindFirstChild(valorSelecionado)
+-- Iniciar observação
+local function iniciarObservar(jogador)
+	if not jogador or jogador == LocalPlayer then
+		warn("Jogador inválido para observar.")
+		return
 	end
-})
 
+	observando = true
+
+	if not jogador.Character or not jogador.Character:FindFirstChild("Humanoid") then
+		warn("Personagem do jogador não está disponível.")
+		return
+	end
+
+	workspace.CurrentCamera.CameraSubject = jogador.Character.Humanoid
+	print("Observando " .. jogador.Name)
+
+	observarConnection = jogador.CharacterAdded:Connect(function()
+		wait(1)
+		if observando then
+			if jogador.Character and jogador.Character:FindFirstChild("Humanoid") then
+				workspace.CurrentCamera.CameraSubject = jogador.Character.Humanoid
+				print("Continuando observação após respawn.")
+			end
+		end
+	end)
+end
+
+-- Toggle para observar
 AddToggle(Player, {
 	Name = "Observar",
 	Default = false,
 	Callback = function(Value)
+		jogadorSelecionado = encontrarJogador(playerName)
 		if Value then
 			if jogadorSelecionado then
-				observando = true
-				observarJogador(jogadorSelecionado)
+				iniciarObservar(jogadorSelecionado)
 			else
-				warn("Nenhum jogador selecionado.")
+				warn("Jogador não encontrado para observar.")
 			end
 		else
 			pararObservar()
@@ -569,109 +553,75 @@ AddToggle(Player, {
 	end
 })
 
--- Iniciar atualização contínua da lista
-task.spawn(atualizarDropdownPeriodicamente)
-
-local Players = game:GetService("Players")
-local LocalPlayer = Players.LocalPlayer
-local RunService = game:GetService("RunService")
-
-local playerName = ""
-local teleportLoopConnection = nil
-local teleportando = false
-
--- Caixa de texto para digitar nome do jogador
-AddTextBox(Player, {
-    Name = "Digite o nome do jogador",
-    Default = "",
-    Placeholder = "Nome do jogador aqui...",
-    Callback = function(text)
-        playerName = text
-    end
-})
-
--- Função para encontrar jogador pelo nome digitado (busca parcial)
-local function encontrarJogador(nome)
-    local lowerName = nome:lower()
-    for _, player in pairs(Players:GetPlayers()) do
-        if player.Name:lower():sub(1, #lowerName) == lowerName then
-            return player
-        end
-    end
-    return nil
-end
-
--- Teleporte único
+-- Botão de teleporte único
 AddButton(Player, {
-    Name = "Teleporte",
-    Callback = function()
-        local jogador = encontrarJogador(playerName)
-        if jogador and jogador.Character and jogador.Character:FindFirstChild("HumanoidRootPart") then
-            local localChar = LocalPlayer.Character
-            if localChar and localChar:FindFirstChild("HumanoidRootPart") then
-                localChar.HumanoidRootPart.CFrame = jogador.Character.HumanoidRootPart.CFrame * CFrame.new(3, 0, 3)
-                print("Teletransportado para " .. jogador.Name)
-            else
-                warn("Seu personagem não está disponível.")
-            end
-        else
-            warn("Jogador inválido ou personagem não carregado.")
-        end
-    end
+	Name = "Teleporte",
+	Callback = function()
+		local jogador = encontrarJogador(playerName)
+		if jogador and jogador.Character and jogador.Character:FindFirstChild("HumanoidRootPart") then
+			local localChar = LocalPlayer.Character
+			if localChar and localChar:FindFirstChild("HumanoidRootPart") then
+				localChar.HumanoidRootPart.CFrame = jogador.Character.HumanoidRootPart.CFrame * CFrame.new(3, 0, 3)
+				print("Teletransportado para " .. jogador.Name)
+			else
+				warn("Seu personagem não está disponível.")
+			end
+		else
+			warn("Jogador inválido ou personagem não carregado.")
+		end
+	end
 })
 
--- Parar o teleporte em loop
+-- Parar teleporte em loop
 local function pararTeleportar()
-    if teleportLoopConnection then
-        teleportLoopConnection:Disconnect()
-        teleportLoopConnection = nil
-    end
-    teleportando = false
-    print("Teleporte em loop desativado.")
+	if teleportLoopConnection then
+		teleportLoopConnection:Disconnect()
+		teleportLoopConnection = nil
+	end
+	teleportando = false
+	print("Teleporte em loop desativado.")
 end
 
--- Iniciar o teleporte em loop
+-- Iniciar teleporte em loop
 local function iniciarTeleportar(jogador)
-    if not jogador or jogador == LocalPlayer then
-        warn("Jogador inválido para teleportar.")
-        return
-    end
+	if not jogador or jogador == LocalPlayer then
+		warn("Jogador inválido para teleportar.")
+		return
+	end
 
-    teleportando = true
+	teleportando = true
 
-    teleportLoopConnection = RunService.RenderStepped:Connect(function()
-        local localChar = LocalPlayer.Character
-        local targetChar = jogador.Character
+	teleportLoopConnection = RunService.RenderStepped:Connect(function()
+		local localChar = LocalPlayer.Character
+		local targetChar = jogador.Character
 
-        if teleportando and localChar and targetChar and
-            localChar:FindFirstChild("HumanoidRootPart") and
-            targetChar:FindFirstChild("HumanoidRootPart") then
-            localChar.HumanoidRootPart.CFrame = targetChar.HumanoidRootPart.CFrame * CFrame.new(3, 0, 3)
-        end
-    end)
+		if teleportando and localChar and targetChar and
+			localChar:FindFirstChild("HumanoidRootPart") and
+			targetChar:FindFirstChild("HumanoidRootPart") then
+			localChar.HumanoidRootPart.CFrame = targetChar.HumanoidRootPart.CFrame * CFrame.new(3, 0, 3)
+		end
+	end)
 
-    print("Teleporte contínuo para " .. jogador.Name)
+	print("Teleporte contínuo para " .. jogador.Name)
 end
 
--- Toggle de teleporte em loop
+-- Toggle de teleporte contínuo
 AddToggle(Player, {
-    Name = "Teleporte em Loop",
-    Default = false,
-    Callback = function(Value)
-        if Value then
-            local jogador = encontrarJogador(playerName)
-            if jogador then
-                iniciarTeleportar(jogador)
-            else
-                warn("Jogador não encontrado para teleportar.")
-            end
-        else
-            pararTeleportar()
-        end
-    end
+	Name = "Teleporte em Loop",
+	Default = false,
+	Callback = function(Value)
+		jogadorSelecionado = encontrarJogador(playerName)
+		if Value then
+			if jogadorSelecionado then
+				iniciarTeleportar(jogadorSelecionado)
+			else
+				warn("Jogador não encontrado para teleportar.")
+			end
+		else
+			pararTeleportar()
+		end
+	end
 })
-local Players = game:GetService("Players")
-local StarterGui = game:GetService("StarterGui")
 
 -- Variável para armazenar o estado das notificações
 local notificacaoAtivada = false
