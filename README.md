@@ -186,7 +186,7 @@ AddSlider(Main, {
     Name = "Altura do pulo",
     MinValue = 10,
     MaxValue = 900,
-    Default = 25,
+    Default = 30,
     Increase = 1,
     Callback = function(Value)
         jumpPowerSelecionado = Value
@@ -493,6 +493,51 @@ AddToggle(Visuais, {
     end
 })
 
+local fovAtivado = false
+local fovValor = 70 -- valor padrão inicial
+local fovPadrao = 70 -- valor para restaurar quando desativar
+
+-- Função para aplicar o FOV
+local function aplicarFov()
+    local camera = workspace.CurrentCamera
+    if camera then
+        if fovAtivado then
+            camera.FieldOfView = fovValor
+        else
+            camera.FieldOfView = fovPadrao
+        end
+    end
+end
+
+-- Atualiza FOV quando o personagem respawnar
+game.Players.LocalPlayer.CharacterAdded:Connect(function()
+    wait(0.5)
+    aplicarFov()
+end)
+
+-- Slider para ajustar o FOV
+AddSlider(Visuais, {
+    Name = "Campo de visão",
+    MinValue = 16,
+    MaxValue = 120,
+    Default = fovValor,
+    Increase = 1,
+    Callback = function(Value)
+        fovValor = Value
+        aplicarFov()
+    end
+})
+
+-- Toggle para ativar/desativar o FOV
+AddToggle(Visuais, {
+    Name = "Campo de visão",
+    Default = false,
+    Callback = function(Value)
+        fovAtivado = Value
+        aplicarFov()
+    end
+})
+
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local RunService = game:GetService("RunService")
@@ -656,7 +701,9 @@ AddToggle(Player, {
 	end
 })
 
--- Variável para armazenar o estado das notificações
+local Players = game:GetService("Players")
+local StarterGui = game:GetService("StarterGui")
+
 local notificacaoAtivada = false
 
 -- Função para exibir notificações
@@ -672,20 +719,19 @@ end
 
 -- Notifica quando um jogador entra no jogo
 Players.PlayerAdded:Connect(function(player)
-    notify("Jogador entrou", player.Name .. " entrou no jogo.")
+    notify(player.Name, "entrou no jogo.")
 end)
 
 -- Notifica quando um jogador sai do jogo
 Players.PlayerRemoving:Connect(function(player)
-    notify("Jogador saiu", player.Name .. " saiu do jogo.")
+    notify(player.Name, "saiu do jogo.")
 end)
 
--- Toggle para ativar/desativar as notificações
+-- Toggle para ativar/desativar notificações (sem aviso ao ativar)
 AddToggle(Player, {
     Name = "Notificações de jogadores",
     Default = false,
     Callback = function(Value)
         notificacaoAtivada = Value
-        notify("Notificações", Value and "Ativada" or "Desativada")
     end
 })
