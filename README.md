@@ -656,3 +656,34 @@ AddToggle(Player, {
         notify("Notificações", Value and "Ativada" or "Desativada")
     end
 })
+
+AddToggle(Player, {
+    Name = "FPS Boost",
+    Default = false,
+    Callback = function(Value)
+        if Value then
+            -- Otimiza partes e efeitos
+            for _, v in ipairs(workspace:GetDescendants()) do
+                if v:IsA("Part") or v:IsA("MeshPart") or v:IsA("UnionOperation") then
+                    v.Material = Enum.Material.SmoothPlastic
+                    v.Reflectance = 0
+                    v.CastShadow = false
+                elseif v:IsA("Decal") or v:IsA("Texture") then
+                    v.Transparency = 1
+                elseif v:IsA("ParticleEmitter") or v:IsA("Trail") or v:IsA("Smoke") or v:IsA("Fire") or v:IsA("Explosion") then
+                    v:Destroy()
+                end
+            end
+
+            -- Ajusta configurações gráficas
+            pcall(function()
+                settings().Rendering.QualityLevel = Enum.QualityLevel.Level01
+                workspace.GlobalShadows = false
+
+                if game:FindFirstChild("Lighting") then
+                    local lighting = game.Lighting
+                    lighting.FogEnd = 1e10
+                    lighting.GlobalShadows = false
+                    lighting.Brightness = 2
+                end
+            end)
