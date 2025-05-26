@@ -239,51 +239,6 @@ AddToggle(Main, {
     end
 })
 
-local fovAtivado = false
-local fovValor = 70 -- valor padrão inicial
-local fovPadrao = 70 -- valor para restaurar quando desativar
-
--- Função para aplicar o FOV
-local function aplicarFov()
-    local camera = workspace.CurrentCamera
-    if camera then
-        if fovAtivado then
-            camera.FieldOfView = fovValor
-        else
-            camera.FieldOfView = fovPadrao
-        end
-    end
-end
-
--- Atualiza FOV quando o personagem respawnar
-game.Players.LocalPlayer.CharacterAdded:Connect(function()
-    wait(0.5)
-    aplicarFov()
-end)
-
--- Slider para ajustar o FOV
-AddSlider(Visuais, {
-    Name = "Campo de visão",
-    MinValue = 16,
-    MaxValue = 120,
-    Default = fovValor,
-    Increase = 1,
-    Callback = function(Value)
-        fovValor = Value
-        aplicarFov()
-    end
-})
-
--- Toggle para ativar/desativar o FOV
-AddToggle(Visuais, {
-    Name = "Campo de visão",
-    Default = false,
-    Callback = function(Value)
-        fovAtivado = Value
-        aplicarFov()
-    end
-})
-
 -- Variáveis de controle
 local espAtivado = false
 local connections = {}
